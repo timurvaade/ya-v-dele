@@ -32,11 +32,90 @@
             <!-- Заголовок секции -->
             <div class="section-head">
                 <h2 class="section-title">СПИСКИ</h2>
-                <span class="section-count">0</span>
+                <span class="section-count">2</span>
             </div>
 
-            <!-- Контейнер для списков (рендерится динамически) -->
-            <div id="lists-container"></div>
+            <!-- Контейнер для списков -->
+            <div id="lists-container">
+                <!-- Карточка списка "Личный" -->
+                <div class="list-card">
+                    <div class="list-card__head">
+                        <h3 class="list-title">Личный</h3>
+                        <span class="list-count">3</span>
+                    </div>
+                    <div class="tasks">
+                        <div class="task">
+                            <div class="task__left">
+                                <input type="checkbox" class="checkbox" id="t1">
+                            </div>
+                            <div class="task__content">
+                                <label for="t1" class="task-title">Купить билеты</label>
+                                <div class="task-meta">
+                                    <span class="pill pill--blue">Личное</span>
+                                    <span class="task-link">🔗</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-divider"></div>
+                        <div class="task">
+                            <div class="task__left">
+                                <input type="checkbox" class="checkbox" id="t2">
+                            </div>
+                            <div class="task__content">
+                                <label for="t2" class="task-title">Закрыть налоги</label>
+                                <div class="task-meta">
+                                    <span class="pill pill--green">Финансы</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-divider"></div>
+                        <div class="task">
+                            <div class="task__left">
+                                <input type="checkbox" class="checkbox" id="t3">
+                            </div>
+                            <div class="task__content">
+                                <label for="t3" class="task-title">Позвонить родителям</label>
+                                <div class="task-meta">
+                                    <span class="pill pill--red">Семья</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Карточка списка "Работа" -->
+                <div class="list-card">
+                    <div class="list-card__head">
+                        <h3 class="list-title">Работа</h3>
+                        <span class="list-count">2</span>
+                    </div>
+                    <div class="tasks">
+                        <div class="task">
+                            <div class="task__left">
+                                <input type="checkbox" class="checkbox" id="t4">
+                            </div>
+                            <div class="task__content">
+                                <label for="t4" class="task-title">Подготовить презентацию</label>
+                                <div class="task-meta">
+                                    <span class="pill pill--cyan">Проект</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="task-divider"></div>
+                        <div class="task">
+                            <div class="task__left">
+                                <input type="checkbox" class="checkbox" id="t5">
+                            </div>
+                            <div class="task__content">
+                                <label for="t5" class="task-title">Разобрать почту</label>
+                                <div class="task-meta">
+                                    <span class="pill pill--violet">Операционка</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
 
         <!-- FAB кнопка -->
