@@ -1,50 +1,49 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="UTF-8" />
-    <title>Я в деле</title>
-    <link rel="stylesheet" href="styles.css" />
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Я в деле — MVP</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="app">
+        <div class="screen">
+            <!-- Верхняя панель -->
+            <div class="topbar">
+                <div class="topbar__left">
+                    <h1 class="brand">Я в деле</h1>
+                    <span class="badge">MVP</span>
+                </div>
+                <div class="topbar__right">
+                    <div class="search">
+                        <input type="text" placeholder="Поиск задач…">
+                    </div>
+                </div>
+            </div>
 
-    <!-- АВАРИЙНЫЕ СТИЛИ ДЛЯ FAB -->
-    <style>
-      .fab {
-        position: fixed;
-        left: 24px;
-        bottom: 24px;
-        width: 76px;
-        height: 76px;
-        border-radius: 999px;
-        border: none;
-        background: #0b0b0b;
-        color: #fff;
-        font-size: 44px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        z-index: 9999;
-        box-shadow: 0 20px 50px rgba(0,0,0,.35);
-        cursor: pointer;
-      }
-    </style>
-  </head>
+            <!-- Табы -->
+            <div class="tabs">
+                <button class="tab is-active" data-filter="all">Все</button>
+                <button class="tab" data-filter="today">Сегодня</button>
+                <button class="tab" data-filter="later">Потом</button>
+            </div>
 
-  <body>
-    <div class="container">
-      <!-- Top bar -->
-      <div class="topbar">
-        <div class="brand">
-          <span>Я в деле</span>
-          <span class="badge">MVP</span>
+            <!-- Заголовок секции -->
+            <div class="section-head">
+                <h2 class="section-title">СПИСКИ</h2>
+                <span class="section-count">0</span>
+            </div>
+
+            <!-- Контейнер для списков (рендерится динамически) -->
+            <div id="lists-container"></div>
         </div>
-        <div class="search">
-          <input type="text" placeholder="Поиск задач..." />
-        </div>
-      </div>
 
-      <!-- тут дальше списки -->
+        <!-- FAB кнопка -->
+        <button class="fab" aria-label="Add">+</button>
     </div>
 
-    <!-- FAB КНОПКА -->
-    <button class="fab" aria-label="Add">+</button>
-  </body>
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
 </html>
