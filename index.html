@@ -9,109 +9,132 @@
 <body>
     <div class="app">
         <div class="screen">
-            <!-- Верхняя панель -->
+            <!-- Верхняя панель с поиском -->
             <div class="topbar">
-                <div class="topbar__left">
-                    <h1 class="brand">Я в деле</h1>
-                    <span class="badge">MVP</span>
-                </div>
-                <div class="topbar__right">
-                    <div class="search">
-                        <input type="text" placeholder="Поиск задач…">
-                    </div>
+                <button class="menu-btn" aria-label="Menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <div class="search">
+                    <input type="text" placeholder="Поиск задач">
                 </div>
             </div>
 
             <!-- Табы -->
             <div class="tabs">
-                <button class="tab is-active" data-filter="all">Все</button>
-                <button class="tab" data-filter="today">Сегодня</button>
-                <button class="tab" data-filter="later">Потом</button>
+                <button class="tab" data-filter="all">Все дела</button>
+                <button class="tab is-active" data-filter="today">Дела на сегодня</button>
+                <button class="tab" data-filter="later">Дела на потом</button>
             </div>
 
-            <!-- Заголовок секции -->
+            <!-- Заголовок раздела -->
             <div class="section-head">
-                <h2 class="section-title">СПИСКИ</h2>
-                <span class="section-count">2</span>
+                <div class="section-head__left">
+                    <h2 class="section-title">Дела на сегодня</h2>
+                    <p class="section-subtitle">вторник, 18 февраля</p>
+                </div>
+                <button class="btn-new-list">+ НОВЫЙ СПИСОК</button>
+            </div>
+
+            <!-- Счётчики фильтров -->
+            <div class="filters">
+                <button class="filter-btn is-active">
+                    <span class="filter-label">все</span>
+                    <span class="filter-count">70</span>
+                </button>
+                <button class="filter-btn">
+                    <span class="filter-label">открыто</span>
+                    <span class="filter-count">40</span>
+                </button>
+                <button class="filter-btn">
+                    <span class="filter-label">закрыто</span>
+                    <span class="filter-count">10</span>
+                </button>
+                <button class="filter-btn">
+                    <span class="filter-label">отложено</span>
+                    <span class="filter-count">10</span>
+                </button>
             </div>
 
             <!-- Контейнер для списков -->
             <div id="lists-container">
-                <!-- Карточка списка "Личный" -->
-                <div class="list-card">
+                <!-- Список покупок -->
+                <div class="list-card is-expanded">
                     <div class="list-card__head">
-                        <h3 class="list-title">Личный</h3>
-                        <span class="list-count">3</span>
+                        <h3 class="list-title">Список покупок</h3>
+                        <button class="toggle-btn" aria-label="Toggle">▲</button>
                     </div>
                     <div class="tasks">
-                        <div class="task">
+                        <div class="task is-completed">
                             <div class="task__left">
-                                <input type="checkbox" class="checkbox" id="t1">
+                                <input type="checkbox" class="checkbox" id="t1" checked>
                             </div>
                             <div class="task__content">
-                                <label for="t1" class="task-title">Купить билеты</label>
-                                <div class="task-meta">
-                                    <span class="pill pill--blue">Личное</span>
-                                    <span class="task-link">🔗</span>
+                                <div class="task-header">
+                                    <span class="pill pill--blue">Питание</span>
+                                    <button class="task-menu">⋮</button>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="task-divider"></div>
-                        <div class="task">
-                            <div class="task__left">
-                                <input type="checkbox" class="checkbox" id="t2">
-                            </div>
-                            <div class="task__content">
-                                <label for="t2" class="task-title">Закрыть налоги</label>
-                                <div class="task-meta">
-                                    <span class="pill pill--green">Финансы</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="task-divider"></div>
-                        <div class="task">
-                            <div class="task__left">
-                                <input type="checkbox" class="checkbox" id="t3">
-                            </div>
-                            <div class="task__content">
-                                <label for="t3" class="task-title">Позвонить родителям</label>
-                                <div class="task-meta">
-                                    <span class="pill pill--red">Семья</span>
+                                <label for="t1" class="task-title">Антиколиковая бутылочка 240 мл</label>
+                                <a href="#" class="task-link-ref">ссылка</a>
+                                <div class="task-description">
+                                    <button class="description-toggle">описание ▼</button>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Карточка списка "Работа" -->
+                <!-- Linko -->
                 <div class="list-card">
                     <div class="list-card__head">
-                        <h3 class="list-title">Работа</h3>
-                        <span class="list-count">2</span>
+                        <h3 class="list-title">Linko</h3>
+                        <button class="toggle-btn" aria-label="Toggle">▼</button>
                     </div>
-                    <div class="tasks">
-                        <div class="task">
-                            <div class="task__left">
-                                <input type="checkbox" class="checkbox" id="t4">
-                            </div>
-                            <div class="task__content">
-                                <label for="t4" class="task-title">Подготовить презентацию</label>
-                                <div class="task-meta">
-                                    <span class="pill pill--cyan">Проект</span>
-                                </div>
-                            </div>
+                    <div class="tasks" style="display: none;">
+                        <div class="task-tags">
+                            <span class="pill pill--green">Конференция</span>
+                            <span class="pill pill--brown">Таргет</span>
                         </div>
-                        <div class="task-divider"></div>
-                        <div class="task">
-                            <div class="task__left">
-                                <input type="checkbox" class="checkbox" id="t5">
-                            </div>
-                            <div class="task__content">
-                                <label for="t5" class="task-title">Разобрать почту</label>
-                                <div class="task-meta">
-                                    <span class="pill pill--violet">Операционка</span>
-                                </div>
-                            </div>
+                    </div>
+                </div>
+
+                <!-- Tamga -->
+                <div class="list-card">
+                    <div class="list-card__head">
+                        <h3 class="list-title">Tamga</h3>
+                        <button class="toggle-btn" aria-label="Toggle">▼</button>
+                    </div>
+                    <div class="tasks" style="display: none;">
+                        <div class="task-tags">
+                            <span class="pill pill--red">Футболки</span>
+                            <span class="pill pill--cyan">Таргет</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nio -->
+                <div class="list-card">
+                    <div class="list-card__head">
+                        <h3 class="list-title">Nio</h3>
+                        <button class="toggle-btn" aria-label="Toggle">▼</button>
+                    </div>
+                    <div class="tasks" style="display: none;">
+                        <div class="task-tags">
+                            <span class="pill pill--teal">встреча</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Выставка -->
+                <div class="list-card">
+                    <div class="list-card__head">
+                        <h3 class="list-title">Выставка</h3>
+                        <button class="toggle-btn" aria-label="Toggle">▼</button>
+                    </div>
+                    <div class="tasks" style="display: none;">
+                        <div class="task-tags">
+                            <span class="pill pill--violet">презентация</span>
                         </div>
                     </div>
                 </div>
