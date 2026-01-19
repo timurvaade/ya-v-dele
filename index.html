@@ -6,7 +6,101 @@
     <link rel="stylesheet" href="styles.css" />
   </head>
   <body>
-    <h1>Я в деле</h1>
-    <p>Сайт подключён и работает</p>
-  </body>
+   <body>
+  <div class="container">
+    <!-- Top bar -->
+    <div class="topbar">
+      <div class="brand">
+        <span>Я в деле</span>
+        <span class="badge">MVP</span>
+      </div>
+      <div class="search">
+        <input type="text" placeholder="Поиск задач…" />
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <div class="tab active">Все</div>
+      <div class="tab">Сегодня</div>
+      <div class="tab">Потом</div>
+    </div>
+
+    <!-- Lists -->
+    <div class="section-title">
+      <span>Списки</span>
+      <span class="muted">2</span>
+    </div>
+
+    <!-- List card -->
+    <div class="card list-card">
+      <div class="list-head">
+        <div class="list-title">Личный</div>
+        <div class="count">3</div>
+      </div>
+
+      <div class="task">
+        <input class="check" type="checkbox" />
+        <div class="task-main">
+          <div class="task-title">Купить билеты</div>
+          <div class="meta">
+            <span class="chip">Личное</span>
+            <a class="link" href="#">ссылка</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="task">
+        <input class="check" type="checkbox" />
+        <div class="task-main">
+          <div class="task-title">Закрыть налоги</div>
+          <div class="meta">
+            <span class="chip">Финансы</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task">
+        <input class="check" type="checkbox" />
+        <div class="task-main">
+          <div class="task-title">Позвонить родителям</div>
+          <div class="meta">
+            <span class="chip">Семья</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- List card -->
+    <div class="card list-card">
+      <div class="list-head">
+        <div class="list-title">Работа</div>
+        <div class="count">2</div>
+      </div>
+
+      <div class="task">
+        <input class="check" type="checkbox" />
+        <div class="task-main">
+          <div class="task-title">Подготовить презентацию</div>
+          <div class="meta">
+            <span class="chip">Проект</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="task">
+        <input class="check" type="checkbox" />
+        <div class="task-main">
+          <div class="task-title">Разобрать почту</div>
+          <div class="meta">
+            <span class="chip">Операционка</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Floating action button -->
+  <div class="fab">+</div>
+</body>
 </html>
