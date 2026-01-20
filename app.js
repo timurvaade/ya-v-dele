@@ -140,7 +140,7 @@ function createListCard(list, tasks) {
   toggleBtn.addEventListener('click', () => {
     const isExpanded = card.classList.toggle('is-expanded');
     tasksContainer.style.display = isExpanded ? 'flex' : 'none';
-    toggleBtn.textContent = isExpanded ? '▲' : '▼';
+    toggleBtn.setAttribute('aria-expanded', String(isExpanded));
   });
   
   card.appendChild(head);
