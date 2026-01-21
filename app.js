@@ -870,13 +870,9 @@ function showEditDescriptionInput(task, descBlock, descText) {
 
   const save = () => {
     const value = textarea.value.trim();
-    if (value) {
-      task.description = value;
-      renderLists();
-      updateCounts();
-    } else {
-      cancel();
-    }
+    task.description = value; // Сохраняем даже пустое (удаление описания)
+    renderLists();
+    updateCounts();
   };
 
   const cancel = () => {
