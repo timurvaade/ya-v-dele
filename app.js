@@ -2,6 +2,7 @@
 let currentFilter = 'all'; // all, today, week, later
 let currentStatusFilter = 'all'; // all, open, closed, risk
 let searchQuery = ''; // поисковый запрос
+let expandedLists = new Set(); // ID раскрытых списков
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
@@ -250,9 +251,13 @@ function filterTasksByStatus(tasks) {
 
 // Создание карточки списка
 function createListCard(list, tasks, autoExpand = false) {
+  // Проверяем, был ли список открыт ранее
+  const wasExpanded = expandedLists.has(list.id);
+  const shouldExpand = autoExpand || wasExpanded;
+
   const card = document.createElement('div');
   card.className = 'list-card';
-  if (autoExpand) card.classList.add('is-expanded');
+  if (shouldExpand) card.classList.add('is-expanded');
   card.dataset.listId = list.id;
   
   // Заголовок списка
@@ -284,7 +289,7 @@ function createListCard(list, tasks, autoExpand = false) {
   // Контейнер задач
   const tasksContainer = document.createElement('div');
   tasksContainer.className = 'tasks';
-  tasksContainer.style.display = autoExpand ? 'flex' : 'none';
+  tasksContainer.style.display = shouldExpand ? 'flex' : 'none';
   
   tasks.forEach(task => {
     const taskElement = createTaskElement(task, list.id);
@@ -308,6 +313,13 @@ function createListCard(list, tasks, autoExpand = false) {
     const isExpanded = card.classList.toggle('is-expanded');
     tasksContainer.style.display = isExpanded ? 'flex' : 'none';
     toggleBtn.setAttribute('aria-expanded', String(isExpanded));
+    
+    // Сохраняем состояние
+    if (isExpanded) {
+      expandedLists.add(list.id);
+    } else {
+      expandedLists.delete(list.id);
+    }
   });
   
   card.appendChild(head);
@@ -352,6 +364,7 @@ function showAddTaskInput(list, tasksContainer, addTaskBtn) {
     const title = input.value.trim();
     if (title) {
       // Создаём новую задачу
+      const today = new Date().toISOString().split('T')[0];
       const newTask = {
         id: String(Date.now()),
         title: title,
@@ -360,8 +373,8 @@ function showAddTaskInput(list, tasksContainer, addTaskBtn) {
         description: '',
         link: '',
         assignee: '',
-        due_date: '',
-        created_at: new Date().toISOString().split('T')[0]
+        due_date: today,
+        created_at: today
       };
       
       // Добавляем в данные
