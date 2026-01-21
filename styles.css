@@ -536,6 +536,21 @@ body {
   color: var(--text-muted);
 }
 
+.task-title-input {
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  width: 100%;
+  padding: 4px 8px;
+  margin: -4px -8px;
+  border: 2px solid var(--accent-blue);
+  border-radius: 8px;
+  background: var(--white);
+  outline: none;
+  font-family: inherit;
+}
+
 .task-link-ref {
   font-size: 16px;
   color: var(--accent-blue);

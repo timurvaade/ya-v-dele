@@ -211,6 +211,55 @@ function createAssignees(assignees = []) {
   return container;
 }
 
+// Инлайн-редактирование названия задачи
+function startInlineEdit(titleLabel, task) {
+  const originalText = task.title;
+  
+  // Создаём input
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'task-title-input';
+  input.value = originalText;
+  
+  // Заменяем label на input
+  titleLabel.style.display = 'none';
+  titleLabel.parentNode.insertBefore(input, titleLabel.nextSibling);
+  input.focus();
+  input.select();
+
+  const saveEdit = () => {
+    const newValue = input.value.trim();
+    if (newValue && newValue !== originalText) {
+      task.title = newValue;
+      titleLabel.textContent = newValue;
+    }
+    finishEdit();
+  };
+
+  const cancelEdit = () => {
+    finishEdit();
+  };
+
+  const finishEdit = () => {
+    input.remove();
+    titleLabel.style.display = '';
+  };
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveEdit();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelEdit();
+    }
+  });
+
+  input.addEventListener('blur', () => {
+    saveEdit();
+  });
+}
+
 // Создание элемента задачи
 function createTaskElement(task, listId) {
   const taskDiv = document.createElement('div');
@@ -273,7 +322,11 @@ function createTaskElement(task, listId) {
   editBtn.innerHTML = '✏️ Редактировать';
   editBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
-    alert('Редактирование задачи (в разработке)');
+    // Находим label с названием задачи
+    const titleLabel = taskContent.querySelector('.task-title');
+    if (!titleLabel) return;
+    
+    startInlineEdit(titleLabel, task);
   });
 
   // Пункт: Отложить / Вернуть
