@@ -657,52 +657,38 @@ body {
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 12px 16px;
-  display: flex;
-  align-items: center;
-  gap: 8px;
   min-height: 44px;
   box-sizing: border-box;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.description-block:hover {
+  background: rgba(0, 0, 0, 0.02);
 }
 
 .description-text {
-  flex: 1;
   font-size: 14px;
   line-height: 1.4;
   color: var(--text-muted);
-  white-space: nowrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .description-arrow {
+  float: right;
   font-size: 10px;
   color: var(--text-light);
-  transition: transform 0.2s ease;
-  opacity: 0;
-  flex-shrink: 0;
-}
-
-/* Стрелка видна только если текст не влезает */
-.description-block.has-overflow {
-  cursor: pointer;
-}
-
-.description-block.has-overflow .description-arrow {
-  opacity: 1;
-}
-
-.description-block.has-overflow:hover {
-  background: rgba(0, 0, 0, 0.02);
+  margin-left: 8px;
+  line-height: 1.4;
 }
 
 /* Раскрытое описание */
 .description-block.is-open .description-text {
-  white-space: normal;
-  overflow: visible;
-}
-
-.description-block.is-open .description-arrow {
-  opacity: 1;
+  -webkit-line-clamp: unset;
+  display: block;
 }
 
 /* Пустое описание */

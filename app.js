@@ -710,30 +710,21 @@ function createTaskElement(task, listId) {
   descBlock.className = 'description-block';
 
   if (task.description) {
+    // Стрелка
+    const descArrow = document.createElement('span');
+    descArrow.className = 'description-arrow';
+    descArrow.textContent = '▶';
+    descBlock.appendChild(descArrow);
+
     // Текст описания
     const descText = document.createElement('span');
     descText.className = 'description-text';
     descText.textContent = task.description;
     descBlock.appendChild(descText);
 
-    // Стрелка (видна только если текст не влезает)
-    const descArrow = document.createElement('span');
-    descArrow.className = 'description-arrow';
-    descArrow.textContent = '▶';
-    descBlock.appendChild(descArrow);
-
-    // Проверяем overflow после рендера
-    requestAnimationFrame(() => {
-      if (descText.scrollWidth > descText.clientWidth) {
-        descBlock.classList.add('has-overflow');
-      }
-    });
-
     descBlock.addEventListener('click', () => {
-      if (descBlock.classList.contains('has-overflow') || descBlock.classList.contains('is-open')) {
-        const isOpen = descBlock.classList.toggle('is-open');
-        descArrow.textContent = isOpen ? '▼' : '▶';
-      }
+      const isOpen = descBlock.classList.toggle('is-open');
+      descArrow.textContent = isOpen ? '▼' : '▶';
     });
   } else {
     // Кнопка "добавить описание"
