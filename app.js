@@ -349,31 +349,22 @@ function createListCard(list, tasks, autoExpand = false) {
   // Обработчик раскрытия/скрытия — клик на весь заголовок (аккордеон)
   head.style.cursor = 'pointer';
   head.addEventListener('click', () => {
-    const wasExpanded = card.classList.contains('is-expanded');
+    const isCurrentlyExpanded = card.classList.contains('is-expanded');
     
-    // Сворачиваем все остальные списки
-    document.querySelectorAll('.list-card.is-expanded').forEach(otherCard => {
-      if (otherCard !== card) {
-        otherCard.classList.remove('is-expanded');
-        otherCard.querySelector('.tasks').style.display = 'none';
-        otherCard.querySelector('.list-toggle').setAttribute('aria-expanded', 'false');
-        const otherId = otherCard.dataset.listId;
-        expandedLists.delete(otherId);
-      }
+    // Сворачиваем ВСЕ списки
+    document.querySelectorAll('.list-card.is-expanded').forEach(openCard => {
+      openCard.classList.remove('is-expanded');
+      openCard.querySelector('.tasks').style.display = 'none';
+      openCard.querySelector('.list-toggle').setAttribute('aria-expanded', 'false');
     });
+    expandedLists.clear();
     
-    // Переключаем текущий список
-    const isExpanded = !wasExpanded;
-    card.classList.toggle('is-expanded', isExpanded);
-    tasksContainer.style.display = isExpanded ? 'flex' : 'none';
-    toggleBtn.setAttribute('aria-expanded', String(isExpanded));
-    
-    // Сохраняем состояние
-    if (isExpanded) {
-      expandedLists.clear(); // Очищаем, т.к. только один может быть открыт
+    // Если текущий был закрыт — открываем его
+    if (!isCurrentlyExpanded) {
+      card.classList.add('is-expanded');
+      tasksContainer.style.display = 'flex';
+      toggleBtn.setAttribute('aria-expanded', 'true');
       expandedLists.add(list.id);
-    } else {
-      expandedLists.delete(list.id);
     }
   });
   
