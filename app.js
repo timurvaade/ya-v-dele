@@ -346,15 +346,31 @@ function createListCard(list, tasks, autoExpand = false) {
   });
   tasksContainer.appendChild(addTaskBtn);
   
-  // Обработчик раскрытия/скрытия — клик на весь заголовок
+  // Обработчик раскрытия/скрытия — клик на весь заголовок (аккордеон)
   head.style.cursor = 'pointer';
   head.addEventListener('click', () => {
-    const isExpanded = card.classList.toggle('is-expanded');
+    const wasExpanded = card.classList.contains('is-expanded');
+    
+    // Сворачиваем все остальные списки
+    document.querySelectorAll('.list-card.is-expanded').forEach(otherCard => {
+      if (otherCard !== card) {
+        otherCard.classList.remove('is-expanded');
+        otherCard.querySelector('.tasks').style.display = 'none';
+        otherCard.querySelector('.list-toggle').setAttribute('aria-expanded', 'false');
+        const otherId = otherCard.dataset.listId;
+        expandedLists.delete(otherId);
+      }
+    });
+    
+    // Переключаем текущий список
+    const isExpanded = !wasExpanded;
+    card.classList.toggle('is-expanded', isExpanded);
     tasksContainer.style.display = isExpanded ? 'flex' : 'none';
     toggleBtn.setAttribute('aria-expanded', String(isExpanded));
     
     // Сохраняем состояние
     if (isExpanded) {
+      expandedLists.clear(); // Очищаем, т.к. только один может быть открыт
       expandedLists.add(list.id);
     } else {
       expandedLists.delete(list.id);
