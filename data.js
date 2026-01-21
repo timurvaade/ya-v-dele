@@ -4,6 +4,12 @@ window.APP_DATA = {
     {
       id: "shopping",
       title: "Список покупок",
+      assignees: [
+        { name: "Анна Петрова", initials: "АП" },
+        { name: "Иван Смирнов", initials: "ИС" },
+        { name: "Лена Карпова", initials: "ЛК" },
+        { name: "Мария Орлова", initials: "МО" }
+      ],
       items: [
         { 
           id: "t1", 
@@ -37,6 +43,10 @@ window.APP_DATA = {
     {
       id: "linko",
       title: "Linko",
+      assignees: [
+        { name: "Сергей Лебедев", initials: "СЛ" },
+        { name: "Кирилл Соколов", initials: "КС" }
+      ],
       items: [
         { 
           id: "t4", 
@@ -61,6 +71,11 @@ window.APP_DATA = {
     {
       id: "tamga",
       title: "Tamga",
+      assignees: [
+        { name: "Андрей Егоров", initials: "АЕ" },
+        { name: "Марина Фролова", initials: "МФ" },
+        { name: "Денис Попов", initials: "ДП" }
+      ],
       items: [
         { 
           id: "t6", 
@@ -85,6 +100,9 @@ window.APP_DATA = {
     {
       id: "nio",
       title: "Nio",
+      assignees: [
+        { name: "Влад Ким", initials: "ВК" }
+      ],
       items: [
         { 
           id: "t8", 
@@ -100,6 +118,12 @@ window.APP_DATA = {
     {
       id: "exhibition",
       title: "Выставка",
+      assignees: [
+        { name: "Катя Иванова", initials: "КИ" },
+        { name: "Роман Белов", initials: "РБ" },
+        { name: "Тимур Саидов", initials: "ТС" },
+        { name: "Олег Савин", initials: "ОС" }
+      ],
       items: [
         { 
           id: "t9", 

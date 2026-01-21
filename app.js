@@ -118,13 +118,20 @@ function createListCard(list, tasks) {
   title.className = 'list-title';
   title.textContent = list.title;
   
+  const headRight = document.createElement('div');
+  headRight.className = 'list-card__head-right';
+
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'toggle-btn';
   toggleBtn.textContent = '▼';
   toggleBtn.setAttribute('aria-label', 'Toggle');
-  
+
+  const assigneesEl = createAssignees(list.assignees);
+  if (assigneesEl) headRight.appendChild(assigneesEl);
+  headRight.appendChild(toggleBtn);
+
   head.appendChild(title);
-  head.appendChild(toggleBtn);
+  head.appendChild(headRight);
   
   // Контейнер задач
   const tasksContainer = document.createElement('div');
@@ -147,6 +154,53 @@ function createListCard(list, tasks) {
   card.appendChild(tasksContainer);
   
   return card;
+}
+
+// Создание блока ответственных
+function createAssignees(assignees = []) {
+  if (!assignees.length) return null;
+
+  const container = document.createElement('div');
+  container.className = 'assignees';
+
+  const maxVisible = 3;
+  const visibleAssignees = assignees.slice(0, maxVisible);
+
+  visibleAssignees.forEach(person => {
+    const avatar = document.createElement('button');
+    avatar.className = 'avatar';
+    avatar.type = 'button';
+    avatar.title = person.name || 'Ответственный';
+
+    const initials = (person.initials || person.name || '?')
+      .trim()
+      .split(/\s+/)
+      .map(part => part[0])
+      .join('')
+      .toUpperCase()
+      .slice(0, 2) || '?';
+
+    avatar.textContent = initials;
+
+    if (person.avatarUrl) {
+      avatar.style.backgroundImage = `url(${person.avatarUrl})`;
+      avatar.classList.add('avatar--image');
+    }
+
+    container.appendChild(avatar);
+  });
+
+  const remaining = assignees.length - maxVisible;
+  if (remaining > 0) {
+    const more = document.createElement('button');
+    more.className = 'avatar avatar--more';
+    more.type = 'button';
+    more.textContent = `+${remaining}`;
+    more.title = `Ещё ${remaining}`;
+    container.appendChild(more);
+  }
+
+  return container;
 }
 
 // Создание элемента задачи
