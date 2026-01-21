@@ -1,11 +1,13 @@
 // Глобальное состояние
 let currentFilter = 'all'; // all, today, week, later
 let currentStatusFilter = 'all'; // all, open, closed, risk
+let searchQuery = ''; // поисковый запрос
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
   initTabs();
   initFilters();
+  initSearch();
   initFAB();
   renderLists();
   updateCounts();
@@ -15,6 +17,22 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.task-dropdown.is-open').forEach(d => d.classList.remove('is-open'));
   });
 });
+
+// Инициализация поиска
+function initSearch() {
+  const searchInput = document.querySelector('.search input');
+  if (!searchInput) return;
+
+  let debounceTimer;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(() => {
+      searchQuery = e.target.value.trim().toLowerCase();
+      renderLists();
+      updateCounts();
+    }, 200); // debounce 200ms
+  });
+}
 
 // Модалка подтверждения
 function showConfirmModal({ title, message, confirmText = 'Подтвердить', onConfirm }) {
@@ -168,8 +186,22 @@ function filterTasks(tasks) {
     } else if (currentStatusFilter === 'risk') {
       matchesStatusFilter = task.status === 'risk';
     }
+
+    // Фильтр по поисковому запросу
+    let matchesSearch = true;
+    if (searchQuery) {
+      const title = (task.title || '').toLowerCase();
+      const description = (task.description || '').toLowerCase();
+      const category = (task.category || '').toLowerCase();
+      const assignee = (task.assignee || '').toLowerCase();
+      
+      matchesSearch = title.includes(searchQuery) ||
+                      description.includes(searchQuery) ||
+                      category.includes(searchQuery) ||
+                      assignee.includes(searchQuery);
+    }
     
-    return matchesStatusFilter;
+    return matchesStatusFilter && matchesSearch;
   });
 }
 
