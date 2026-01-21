@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initSearch();
   initFAB();
   initCurrentDate();
+  initPullToRefresh();
   renderLists();
   updateCounts();
 
@@ -123,6 +124,106 @@ function showConfirmModal({ title, message, confirmText = 'Подтвердит�
   cancelBtn.focus();
 }
 
+// Модалка выбора даты
+function showDatePickerModal(task) {
+  const existing = document.querySelector('.modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  const modalTitle = document.createElement('h3');
+  modalTitle.className = 'modal__title';
+  modalTitle.textContent = 'Выберите дату';
+
+  // Быстрые кнопки
+  const quickButtons = document.createElement('div');
+  quickButtons.className = 'date-quick-buttons';
+
+  const today = new Date();
+  const tomorrow = new Date(today);
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const nextWeek = new Date(today);
+  nextWeek.setDate(nextWeek.getDate() + 7);
+
+  const quickOptions = [
+    { label: 'Сегодня', date: today },
+    { label: 'Завтра', date: tomorrow },
+    { label: 'Через неделю', date: nextWeek },
+    { label: 'Без даты', date: null }
+  ];
+
+  quickOptions.forEach(opt => {
+    const btn = document.createElement('button');
+    btn.className = 'date-quick-btn';
+    btn.type = 'button';
+    btn.textContent = opt.label;
+    btn.addEventListener('click', () => {
+      if (opt.date) {
+        task.due_date = opt.date.toISOString().split('T')[0];
+      } else {
+        task.due_date = '';
+      }
+      overlay.remove();
+      renderLists();
+      updateCounts();
+    });
+    quickButtons.appendChild(btn);
+  });
+
+  // Input для выбора даты
+  const dateInput = document.createElement('input');
+  dateInput.type = 'date';
+  dateInput.className = 'modal__date-input';
+  dateInput.value = task.due_date || '';
+
+  const modalActions = document.createElement('div');
+  modalActions.className = 'modal__actions';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'modal__btn modal__btn--cancel';
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Отмена';
+  cancelBtn.addEventListener('click', () => overlay.remove());
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'modal__btn modal__btn--confirm';
+  saveBtn.type = 'button';
+  saveBtn.textContent = 'Сохранить';
+  saveBtn.addEventListener('click', () => {
+    task.due_date = dateInput.value;
+    overlay.remove();
+    renderLists();
+    updateCounts();
+  });
+
+  modalActions.appendChild(cancelBtn);
+  modalActions.appendChild(saveBtn);
+
+  modal.appendChild(modalTitle);
+  modal.appendChild(quickButtons);
+  modal.appendChild(dateInput);
+  modal.appendChild(modalActions);
+  overlay.appendChild(modal);
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+}
+
 // Инициализация табов
 function initTabs() {
   const tabs = document.querySelectorAll('.tab');
@@ -194,8 +295,157 @@ function initFilters() {
 function initFAB() {
   const fab = document.querySelector('.fab');
   fab.addEventListener('click', () => {
-    alert('Создание новой задачи (в разработке)');
+    showCreateListModal();
   });
+}
+
+// Модалка создания нового списка
+function showCreateListModal() {
+  const existing = document.querySelector('.modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  const modalTitle = document.createElement('h3');
+  modalTitle.className = 'modal__title';
+  modalTitle.textContent = 'Новый список';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'modal__input';
+  input.placeholder = 'Название списка';
+  input.autocomplete = 'off';
+
+  const modalActions = document.createElement('div');
+  modalActions.className = 'modal__actions';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'modal__btn modal__btn--cancel';
+  cancelBtn.textContent = 'Отмена';
+
+  const createBtn = document.createElement('button');
+  createBtn.className = 'modal__btn modal__btn--confirm';
+  createBtn.textContent = 'Создать';
+
+  const close = () => overlay.remove();
+
+  const create = () => {
+    const title = input.value.trim();
+    if (title) {
+      const newList = {
+        id: 'list-' + Date.now(),
+        title: title,
+        items: []
+      };
+      window.APP_DATA.lists.unshift(newList); // Добавляем в начало
+      renderLists();
+      updateCounts();
+      close();
+      
+      // Открываем новый список
+      expandedLists.clear();
+      expandedLists.add(newList.id);
+      renderLists();
+    }
+  };
+
+  cancelBtn.addEventListener('click', close);
+  createBtn.addEventListener('click', create);
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) close();
+  });
+  
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') create();
+    if (e.key === 'Escape') close();
+  });
+
+  modalActions.appendChild(cancelBtn);
+  modalActions.appendChild(createBtn);
+  modal.appendChild(modalTitle);
+  modal.appendChild(input);
+  modal.appendChild(modalActions);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+
+  setTimeout(() => input.focus(), 100);
+}
+
+// Pull-to-refresh
+function initPullToRefresh() {
+  const screen = document.querySelector('.screen');
+  if (!screen) return;
+
+  let startY = 0;
+  let pulling = false;
+  
+  // Создаём индикатор
+  const indicator = document.createElement('div');
+  indicator.className = 'pull-indicator';
+  indicator.innerHTML = '<span class="pull-indicator__icon">↓</span><span class="pull-indicator__text">Потяните для обновления</span>';
+  screen.insertBefore(indicator, screen.firstChild);
+
+  screen.addEventListener('touchstart', (e) => {
+    if (screen.scrollTop === 0) {
+      startY = e.touches[0].pageY;
+      pulling = true;
+    }
+  }, { passive: true });
+
+  screen.addEventListener('touchmove', (e) => {
+    if (!pulling) return;
+    
+    const currentY = e.touches[0].pageY;
+    const diff = currentY - startY;
+    
+    if (diff > 0 && diff < 150) {
+      indicator.style.height = diff + 'px';
+      indicator.style.opacity = Math.min(diff / 80, 1);
+      
+      if (diff > 80) {
+        indicator.classList.add('is-ready');
+        indicator.querySelector('.pull-indicator__text').textContent = 'Отпустите для обновления';
+      } else {
+        indicator.classList.remove('is-ready');
+        indicator.querySelector('.pull-indicator__text').textContent = 'Потяните для обновления';
+      }
+    }
+  }, { passive: true });
+
+  screen.addEventListener('touchend', () => {
+    if (!pulling) return;
+    
+    const height = parseInt(indicator.style.height) || 0;
+    
+    if (height > 80) {
+      // Выполняем обновление
+      indicator.classList.add('is-loading');
+      indicator.querySelector('.pull-indicator__text').textContent = 'Обновление...';
+      indicator.querySelector('.pull-indicator__icon').textContent = '⟳';
+      
+      setTimeout(() => {
+        renderLists();
+        updateCounts();
+        resetIndicator();
+      }, 800);
+    } else {
+      resetIndicator();
+    }
+    
+    pulling = false;
+  });
+
+  function resetIndicator() {
+    indicator.style.height = '0';
+    indicator.style.opacity = '0';
+    indicator.classList.remove('is-ready', 'is-loading');
+    indicator.querySelector('.pull-indicator__icon').textContent = '↓';
+    indicator.querySelector('.pull-indicator__text').textContent = 'Потяните для обновления';
+  }
 }
 
 // Инициализация текущей даты
@@ -359,7 +609,7 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   
   const headLeft = document.createElement('div');
   headLeft.className = 'list-card__head-left';
-
+  
   const title = document.createElement('h3');
   title.className = 'list-title';
   title.textContent = list.title;
@@ -370,12 +620,12 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
 
   headLeft.appendChild(title);
   headLeft.appendChild(countBadge);
-
+  
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'toggle-btn';
   toggleBtn.textContent = '▼';
   toggleBtn.setAttribute('aria-label', 'Toggle');
-
+  
   head.appendChild(headLeft);
   head.appendChild(toggleBtn);
   
@@ -388,7 +638,7 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
     const taskElement = createTaskElement(task, list.id);
     tasksContainer.appendChild(taskElement);
   });
-
+  
   // Кнопка "Добавить задачу"
   const addTaskBtn = document.createElement('button');
   addTaskBtn.className = 'add-task-btn';
@@ -652,7 +902,7 @@ function createTaskElement(task, listId) {
     pill.textContent = task.category;
     taskHeader.appendChild(pill);
   }
-
+  
   // Правая часть заголовка (ответственные + меню)
   const headerRight = document.createElement('div');
   headerRight.className = 'task-header__right';
@@ -685,6 +935,17 @@ function createTaskElement(task, listId) {
     if (!titleLabel) return;
     
     startInlineEdit(titleLabel, task);
+  });
+
+  // Пункт: Дата
+  const dateBtn = document.createElement('button');
+  dateBtn.className = 'task-dropdown__item';
+  dateBtn.type = 'button';
+  const currentDate = task.due_date ? formatDate(task.due_date) : 'не указана';
+  dateBtn.innerHTML = `📅 Дата: ${currentDate}`;
+  dateBtn.addEventListener('click', () => {
+    dropdown.classList.remove('is-open');
+    showDatePickerModal(task);
   });
 
   // Пункт: В риске / Убрать из риска
@@ -725,6 +986,7 @@ function createTaskElement(task, listId) {
   });
 
   dropdown.appendChild(editBtn);
+  dropdown.appendChild(dateBtn);
   dropdown.appendChild(riskBtn);
   dropdown.appendChild(deleteBtn);
 

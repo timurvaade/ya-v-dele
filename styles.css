@@ -953,13 +953,132 @@ body {
 }
 
 .modal__btn--confirm {
-  background: var(--accent-red);
+  background: var(--accent-blue);
   color: white;
 }
 
 .modal__btn--confirm:hover {
+  background: #3a7bc8;
+  transform: translateY(-1px);
+}
+
+.modal__btn--danger {
+  background: var(--accent-red);
+  color: white;
+}
+
+.modal__btn--danger:hover {
   background: #c45a42;
   transform: translateY(-1px);
+}
+
+.modal__input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--white);
+  margin-bottom: 20px;
+  transition: border-color 0.2s ease;
+}
+
+.modal__input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+.modal__input::placeholder {
+  color: var(--text-light);
+}
+
+/* Date picker modal */
+.date-quick-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.date-quick-btn {
+  flex: 1;
+  min-width: calc(50% - 4px);
+  padding: 12px 16px;
+  background: rgba(0, 0, 0, 0.04);
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.date-quick-btn:hover {
+  background: rgba(0, 0, 0, 0.08);
+}
+
+.date-quick-btn:active {
+  transform: scale(0.98);
+}
+
+.modal__date-input {
+  width: 100%;
+  padding: 14px 16px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  font-size: 16px;
+  font-family: inherit;
+  color: var(--text);
+  background: var(--white);
+  margin-bottom: 20px;
+  transition: border-color 0.2s ease;
+}
+
+.modal__date-input:focus {
+  outline: none;
+  border-color: var(--accent-blue);
+}
+
+/* Pull to Refresh */
+.pull-indicator {
+  height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  margin: -12px -12px 12px -12px;
+  padding-top: 12px;
+}
+
+.pull-indicator__icon {
+  font-size: 20px;
+  color: var(--text-light);
+  transition: transform 0.2s ease;
+}
+
+.pull-indicator.is-ready .pull-indicator__icon {
+  transform: rotate(180deg);
+}
+
+.pull-indicator.is-loading .pull-indicator__icon {
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+.pull-indicator__text {
+  font-size: 12px;
+  color: var(--text-light);
 }
 
 /* Mobile-first: базовые стили уже для мобильных */
