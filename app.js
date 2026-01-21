@@ -291,8 +291,9 @@ function createListCard(list, tasks, autoExpand = false) {
     tasksContainer.appendChild(taskElement);
   });
   
-  // Обработчик раскрытия/скрытия
-  toggleBtn.addEventListener('click', () => {
+  // Обработчик раскрытия/скрытия — клик на весь заголовок
+  head.style.cursor = 'pointer';
+  head.addEventListener('click', () => {
     const isExpanded = card.classList.toggle('is-expanded');
     tasksContainer.style.display = isExpanded ? 'flex' : 'none';
     toggleBtn.setAttribute('aria-expanded', String(isExpanded));

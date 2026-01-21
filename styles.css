@@ -271,6 +271,8 @@ body {
   justify-content: space-between;
   align-items: center;
   margin-bottom: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 .list-card__head-left {
@@ -444,19 +446,26 @@ body {
 }
 
 .task-menu {
-  width: 24px;
-  height: 24px;
+  width: 32px;
+  height: 32px;
   background: none;
   border: none;
-  font-size: 18px;
+  font-size: 20px;
   color: var(--text-muted);
   cursor: pointer;
-  border-radius: 4px;
+  border-radius: 8px;
   transition: background 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .task-menu:hover {
   background: rgba(0, 0, 0, 0.06);
+}
+
+.task-menu:active {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .task-dropdown {
