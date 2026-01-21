@@ -9,6 +9,11 @@ document.addEventListener('DOMContentLoaded', () => {
   initFAB();
   renderLists();
   updateCounts();
+
+  // Закрытие dropdown при клике вне меню
+  document.addEventListener('click', () => {
+    document.querySelectorAll('.task-dropdown.is-open').forEach(d => d.classList.remove('is-open'));
+  });
 });
 
 // Инициализация табов
@@ -249,13 +254,73 @@ function createTaskElement(task, listId) {
   const assigneesEl = createAssignees(task.assignees);
   if (assigneesEl) taskHeader.appendChild(assigneesEl);
   
-  const taskMenu = document.createElement('button');
-  taskMenu.className = 'task-menu';
-  taskMenu.textContent = '⋮';
-  taskMenu.addEventListener('click', () => {
-    alert('Меню задачи (в разработке)');
+  // Меню задачи (dropdown)
+  const menuWrapper = document.createElement('div');
+  menuWrapper.className = 'task-menu-wrapper';
+
+  const taskMenuBtn = document.createElement('button');
+  taskMenuBtn.className = 'task-menu';
+  taskMenuBtn.type = 'button';
+  taskMenuBtn.textContent = '⋮';
+
+  const dropdown = document.createElement('div');
+  dropdown.className = 'task-dropdown';
+
+  // Пункт: Редактировать
+  const editBtn = document.createElement('button');
+  editBtn.className = 'task-dropdown__item';
+  editBtn.type = 'button';
+  editBtn.innerHTML = '✏️ Редактировать';
+  editBtn.addEventListener('click', () => {
+    dropdown.classList.remove('is-open');
+    alert('Редактирование задачи (в разработке)');
   });
-  taskHeader.appendChild(taskMenu);
+
+  // Пункт: Отложить / Вернуть
+  const postponeBtn = document.createElement('button');
+  postponeBtn.className = 'task-dropdown__item';
+  postponeBtn.type = 'button';
+  postponeBtn.innerHTML = task.postponed ? '▶️ Вернуть в работу' : '⏸️ Отложить';
+  postponeBtn.addEventListener('click', () => {
+    dropdown.classList.remove('is-open');
+    task.postponed = !task.postponed;
+    renderLists();
+    updateCounts();
+  });
+
+  // Пункт: Удалить
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'task-dropdown__item task-dropdown__item--danger';
+  deleteBtn.type = 'button';
+  deleteBtn.innerHTML = '🗑️ Удалить';
+  deleteBtn.addEventListener('click', () => {
+    dropdown.classList.remove('is-open');
+    // Находим список и удаляем задачу
+    const list = window.APP_DATA.lists.find(l => l.id === listId);
+    if (list) {
+      const idx = list.items.findIndex(t => t.id === task.id);
+      if (idx !== -1) {
+        list.items.splice(idx, 1);
+        renderLists();
+        updateCounts();
+      }
+    }
+  });
+
+  dropdown.appendChild(editBtn);
+  dropdown.appendChild(postponeBtn);
+  dropdown.appendChild(deleteBtn);
+
+  taskMenuBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    // Закрываем все другие открытые меню
+    document.querySelectorAll('.task-dropdown.is-open').forEach(d => d.classList.remove('is-open'));
+    dropdown.classList.toggle('is-open');
+  });
+
+  menuWrapper.appendChild(taskMenuBtn);
+  menuWrapper.appendChild(dropdown);
+  taskHeader.appendChild(menuWrapper);
   
   taskContent.appendChild(taskHeader);
   
