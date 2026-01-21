@@ -460,6 +460,7 @@ body {
 .task-menu-wrapper {
   position: relative;
   flex-shrink: 0;
+  margin-left: auto;
 }
 
 .task-menu {
