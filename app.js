@@ -290,6 +290,17 @@ function createListCard(list, tasks, autoExpand = false) {
     const taskElement = createTaskElement(task, list.id);
     tasksContainer.appendChild(taskElement);
   });
+
+  // Кнопка "Добавить задачу"
+  const addTaskBtn = document.createElement('button');
+  addTaskBtn.className = 'add-task-btn';
+  addTaskBtn.type = 'button';
+  addTaskBtn.textContent = '+ Добавить задачу';
+  addTaskBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showAddTaskInput(list, tasksContainer, addTaskBtn);
+  });
+  tasksContainer.appendChild(addTaskBtn);
   
   // Обработчик раскрытия/скрытия — клик на весь заголовок
   head.style.cursor = 'pointer';
@@ -303,6 +314,93 @@ function createListCard(list, tasks, autoExpand = false) {
   card.appendChild(tasksContainer);
   
   return card;
+}
+
+// Показать инпут для добавления задачи
+function showAddTaskInput(list, tasksContainer, addTaskBtn) {
+  // Если уже есть инпут — фокусируемся на нём
+  const existingInput = tasksContainer.querySelector('.add-task-input');
+  if (existingInput) {
+    existingInput.focus();
+    return;
+  }
+
+  // Скрываем кнопку
+  addTaskBtn.style.display = 'none';
+
+  // Создаём контейнер для инпута
+  const inputWrapper = document.createElement('div');
+  inputWrapper.className = 'add-task-wrapper';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'add-task-input';
+  input.placeholder = 'Название задачи...';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'add-task-save';
+  saveBtn.type = 'button';
+  saveBtn.textContent = '✓';
+
+  inputWrapper.appendChild(input);
+  inputWrapper.appendChild(saveBtn);
+  tasksContainer.appendChild(inputWrapper);
+
+  input.focus();
+
+  const saveTask = () => {
+    const title = input.value.trim();
+    if (title) {
+      // Создаём новую задачу
+      const newTask = {
+        id: String(Date.now()),
+        title: title,
+        category: '',
+        status: 'open',
+        description: '',
+        link: '',
+        assignee: '',
+        due_date: '',
+        created_at: new Date().toISOString().split('T')[0]
+      };
+      
+      // Добавляем в данные
+      list.items.push(newTask);
+      
+      // Перерисовываем
+      renderLists();
+      updateCounts();
+    } else {
+      cancelInput();
+    }
+  };
+
+  const cancelInput = () => {
+    inputWrapper.remove();
+    addTaskBtn.style.display = '';
+  };
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      saveTask();
+    } else if (e.key === 'Escape') {
+      e.preventDefault();
+      cancelInput();
+    }
+  });
+
+  input.addEventListener('blur', (e) => {
+    // Если клик был на кнопку сохранения — не отменяем
+    if (e.relatedTarget === saveBtn) return;
+    setTimeout(() => {
+      if (document.activeElement !== saveBtn) {
+        cancelInput();
+      }
+    }, 100);
+  });
+
+  saveBtn.addEventListener('click', saveTask);
 }
 
 // Парсинг строки assignee в массив объектов

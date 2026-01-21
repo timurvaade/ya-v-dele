@@ -431,7 +431,67 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  gap: 6px;
+}
+
+/* Add Task Button */
+.add-task-btn {
+  width: 100%;
+  padding: 12px;
+  margin-top: 8px;
+  background: none;
+  border: 1px dashed var(--line);
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--text-light);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.add-task-btn:hover {
+  border-color: var(--text-muted);
+  color: var(--text-muted);
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.add-task-wrapper {
+  display: flex;
   gap: 8px;
+  margin-top: 8px;
+}
+
+.add-task-input {
+  flex: 1;
+  padding: 12px;
+  border: 1px solid var(--accent-blue);
+  border-radius: 12px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  outline: none;
+  background: var(--white);
+}
+
+.add-task-input::placeholder {
+  color: var(--text-light);
+}
+
+.add-task-save {
+  width: 44px;
+  height: 44px;
+  background: var(--accent-blue);
+  border: none;
+  border-radius: 12px;
+  font-size: 18px;
+  color: white;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  flex-shrink: 0;
+}
+
+.add-task-save:hover {
+  background: #3a7bc8;
 }
 
 .task-header {
