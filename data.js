@@ -13,8 +13,8 @@ window.APP_DATA = {
           description: "Обязательно купить две бутылочки, для 0 и 3/4 месяца",
           link: "https://ozon.ru/product/123",
           assignee: "Анна, Иван, Лена, Мария, Петр, Олег",
-          due_date: "2025-01-25",
-          created_at: "2025-01-20"
+          due_date: "2026-01-25",
+          created_at: "2026-01-20"
         },
         { 
           id: "17000002", 
@@ -24,8 +24,8 @@ window.APP_DATA = {
           description: "",
           link: "",
           assignee: "Сергей",
-          due_date: "2025-01-26",
-          created_at: "2025-01-20"
+          due_date: "2026-01-26",
+          created_at: "2026-01-20"
         },
         { 
           id: "17000003", 
@@ -35,8 +35,19 @@ window.APP_DATA = {
           description: "Срочно нужны, заканчиваются",
           link: "",
           assignee: "",
-          due_date: "2025-01-22",
-          created_at: "2025-01-18"
+          due_date: "2026-01-22",
+          created_at: "2026-01-18"
+        },
+        { 
+          id: "17000010", 
+          title: "Купить соску", 
+          category: "Личное", 
+          status: "open",
+          description: "",
+          link: "",
+          assignee: "Анна",
+          due_date: "2026-01-22",
+          created_at: "2026-01-21"
         }
       ]
     },
@@ -52,8 +63,8 @@ window.APP_DATA = {
           description: "Нужно подготовить 15 слайдов с графиками продаж за последний квартал",
           link: "",
           assignee: "Кирилл, Денис",
-          due_date: "2025-02-01",
-          created_at: "2025-01-15"
+          due_date: "2026-02-01",
+          created_at: "2026-01-15"
         },
         { 
           id: "17000005", 
@@ -63,8 +74,8 @@ window.APP_DATA = {
           description: "",
           link: "",
           assignee: "Марина, Влад, Катя, Роман",
-          due_date: "2025-01-28",
-          created_at: "2025-01-10"
+          due_date: "2026-01-28",
+          created_at: "2026-01-10"
         }
       ]
     },
@@ -80,8 +91,8 @@ window.APP_DATA = {
           description: "",
           link: "https://printbar.ru/order/456",
           assignee: "Андрей",
-          due_date: "2025-02-10",
-          created_at: "2025-01-12"
+          due_date: "2026-02-10",
+          created_at: "2026-01-12"
         },
         { 
           id: "17000007", 
@@ -91,8 +102,8 @@ window.APP_DATA = {
           description: "Бюджет согласован, ждём креативы",
           link: "",
           assignee: "Тимур, Олег, Саша",
-          due_date: "2025-01-30",
-          created_at: "2025-01-08"
+          due_date: "2026-01-30",
+          created_at: "2026-01-08"
         }
       ]
     },
@@ -108,8 +119,8 @@ window.APP_DATA = {
           description: "",
           link: "https://meet.google.com/abc-defg-hij",
           assignee: "Влад",
-          due_date: "2025-01-27",
-          created_at: "2025-01-21"
+          due_date: "2026-01-27",
+          created_at: "2026-01-21"
         }
       ]
     },
@@ -125,8 +136,8 @@ window.APP_DATA = {
           description: "Дизайн утверждён, нужно напечатать",
           link: "",
           assignee: "Катя, Роман, Тимур, Олег, Саша",
-          due_date: "2025-03-01",
-          created_at: "2025-01-05"
+          due_date: "2026-03-01",
+          created_at: "2026-01-05"
         }
       ]
     }
