@@ -16,6 +16,72 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 
+// Модалка подтверждения
+function showConfirmModal({ title, message, confirmText = 'Подтвердить', onConfirm }) {
+  // Удаляем старую модалку если есть
+  const existing = document.querySelector('.modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  const modalTitle = document.createElement('h3');
+  modalTitle.className = 'modal__title';
+  modalTitle.textContent = title;
+
+  const modalMessage = document.createElement('p');
+  modalMessage.className = 'modal__message';
+  modalMessage.textContent = message;
+
+  const modalActions = document.createElement('div');
+  modalActions.className = 'modal__actions';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'modal__btn modal__btn--cancel';
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Отмена';
+  cancelBtn.addEventListener('click', () => overlay.remove());
+
+  const confirmBtn = document.createElement('button');
+  confirmBtn.className = 'modal__btn modal__btn--confirm';
+  confirmBtn.type = 'button';
+  confirmBtn.textContent = confirmText;
+  confirmBtn.addEventListener('click', () => {
+    overlay.remove();
+    if (onConfirm) onConfirm();
+  });
+
+  modalActions.appendChild(cancelBtn);
+  modalActions.appendChild(confirmBtn);
+
+  modal.appendChild(modalTitle);
+  modal.appendChild(modalMessage);
+  modal.appendChild(modalActions);
+  overlay.appendChild(modal);
+
+  document.body.appendChild(overlay);
+
+  // Закрытие по клику на оверлей
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  // Закрытие по Escape
+  const handleEscape = (e) => {
+    if (e.key === 'Escape') {
+      overlay.remove();
+      document.removeEventListener('keydown', handleEscape);
+    }
+  };
+  document.addEventListener('keydown', handleEscape);
+
+  // Фокус на кнопку отмены
+  cancelBtn.focus();
+}
+
 // Инициализация табов
 function initTabs() {
   const tabs = document.querySelectorAll('.tab');
@@ -348,16 +414,22 @@ function createTaskElement(task, listId) {
   deleteBtn.innerHTML = '🗑️ Удалить';
   deleteBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
-    // Находим список и удаляем задачу
-    const list = window.APP_DATA.lists.find(l => l.id === listId);
-    if (list) {
-      const idx = list.items.findIndex(t => t.id === task.id);
-      if (idx !== -1) {
-        list.items.splice(idx, 1);
-        renderLists();
-        updateCounts();
+    showConfirmModal({
+      title: 'Удалить задачу?',
+      message: `«${task.title}» будет удалена без возможности восстановления.`,
+      confirmText: 'Удалить',
+      onConfirm: () => {
+        const list = window.APP_DATA.lists.find(l => l.id === listId);
+        if (list) {
+          const idx = list.items.findIndex(t => t.id === task.id);
+          if (idx !== -1) {
+            list.items.splice(idx, 1);
+            renderLists();
+            updateCounts();
+          }
+        }
       }
-    }
+    });
   });
 
   dropdown.appendChild(editBtn);
