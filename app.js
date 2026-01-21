@@ -710,21 +710,43 @@ function createTaskElement(task, listId) {
   descBlock.className = 'description-block';
 
   if (task.description) {
-    // Стрелка
-    const descArrow = document.createElement('span');
-    descArrow.className = 'description-arrow';
-    descArrow.textContent = '▶';
-    descBlock.appendChild(descArrow);
-
     // Текст описания
     const descText = document.createElement('span');
     descText.className = 'description-text';
     descText.textContent = task.description;
     descBlock.appendChild(descText);
 
+    // Стрелка (скрыта по умолчанию, видна только если overflow)
+    const descArrow = document.createElement('span');
+    descArrow.className = 'description-arrow';
+    descArrow.textContent = '▼'; // вниз = развернуть
+    descBlock.appendChild(descArrow);
+
+    // Кнопка редактирования (видна когда раскрыто)
+    const editBtn = document.createElement('button');
+    editBtn.className = 'description-edit';
+    editBtn.type = 'button';
+    editBtn.textContent = 'редактировать';
+    editBtn.style.display = 'none';
+    editBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showEditDescriptionInput(task, descBlock, descText);
+    });
+    descBlock.appendChild(editBtn);
+
+    // Проверяем overflow после рендера
+    setTimeout(() => {
+      if (descText.scrollHeight > descText.clientHeight) {
+        descBlock.classList.add('has-overflow');
+      }
+    }, 0);
+
     descBlock.addEventListener('click', () => {
+      if (!descBlock.classList.contains('has-overflow') && !descBlock.classList.contains('is-open')) return;
+      
       const isOpen = descBlock.classList.toggle('is-open');
-      descArrow.textContent = isOpen ? '▼' : '▶';
+      descArrow.textContent = isOpen ? '▲' : '▼'; // вверх = свернуть
+      editBtn.style.display = isOpen ? 'inline-block' : 'none';
     });
   } else {
     // Кнопка "добавить описание"
@@ -780,6 +802,70 @@ function showAddDescriptionInput(task, taskContent, descBlock) {
   taskContent.appendChild(inputWrapper);
 
   textarea.focus();
+
+  const save = () => {
+    const value = textarea.value.trim();
+    if (value) {
+      task.description = value;
+      renderLists();
+      updateCounts();
+    } else {
+      cancel();
+    }
+  };
+
+  const cancel = () => {
+    inputWrapper.remove();
+    descBlock.style.display = '';
+  };
+
+  saveBtn.addEventListener('click', save);
+  cancelBtn.addEventListener('click', cancel);
+
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancel();
+    }
+  });
+}
+
+// Показать инпут для редактирования описания
+function showEditDescriptionInput(task, descBlock, descText) {
+  const originalText = task.description;
+  
+  // Скрываем блок описания
+  descBlock.style.display = 'none';
+  
+  const inputWrapper = document.createElement('div');
+  inputWrapper.className = 'add-desc-wrapper';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'add-desc-input';
+  textarea.value = originalText;
+  textarea.rows = 3;
+
+  const btnGroup = document.createElement('div');
+  btnGroup.className = 'add-desc-buttons';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'add-desc-save';
+  saveBtn.type = 'button';
+  saveBtn.textContent = 'Сохранить';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'add-desc-cancel';
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Отмена';
+
+  btnGroup.appendChild(cancelBtn);
+  btnGroup.appendChild(saveBtn);
+  inputWrapper.appendChild(textarea);
+  inputWrapper.appendChild(btnGroup);
+  
+  descBlock.parentNode.insertBefore(inputWrapper, descBlock.nextSibling);
+  textarea.focus();
+  textarea.setSelectionRange(textarea.value.length, textarea.value.length);
 
   const save = () => {
     const value = textarea.value.trim();
