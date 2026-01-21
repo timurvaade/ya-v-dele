@@ -134,11 +134,39 @@ function initTabs() {
       tab.classList.add('is-active');
       // Меняем фильтр
       currentFilter = tab.dataset.filter;
+      // Обновляем заголовок секции
+      updateSectionTitle();
       // Перерисовываем списки
       renderLists();
       updateCounts();
     });
   });
+}
+
+// Обновление заголовка секции
+function updateSectionTitle() {
+  const sectionTitle = document.querySelector('.section-title');
+  const sectionSubtitle = document.querySelector('.section-subtitle');
+  
+  if (!sectionTitle || !sectionSubtitle) return;
+  
+  const today = new Date();
+  const options = { weekday: 'long', day: 'numeric', month: 'long' };
+  
+  if (currentFilter === 'today') {
+    sectionTitle.textContent = 'Дела на сегодня';
+    sectionSubtitle.textContent = today.toLocaleDateString('ru-RU', options);
+  } else if (currentFilter === 'week') {
+    sectionTitle.textContent = 'Дела на неделю';
+    const weekEnd = new Date(today);
+    weekEnd.setDate(weekEnd.getDate() + 7);
+    const startStr = today.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    const endStr = weekEnd.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
+    sectionSubtitle.textContent = `${startStr} — ${endStr}`;
+  } else {
+    sectionTitle.textContent = 'Все дела';
+    sectionSubtitle.textContent = 'Все задачи из всех списков';
+  }
 }
 
 // Инициализация фильтров статуса
@@ -172,19 +200,7 @@ function initFAB() {
 
 // Инициализация текущей даты
 function initCurrentDate() {
-  const dateEl = document.getElementById('current-date');
-  if (!dateEl) return;
-
-  const now = new Date();
-  const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
-  const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 
-                  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
-  
-  const dayName = days[now.getDay()];
-  const day = now.getDate();
-  const month = months[now.getMonth()];
-  
-  dateEl.textContent = `${dayName}, ${day} ${month}`;
+  updateSectionTitle();
 }
 
 // Проверка, является ли дата "сегодня"
@@ -216,7 +232,33 @@ function formatDate(dateStr) {
 
 // Фильтрация задач по текущему фильтру
 function filterTasks(tasks) {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const weekEnd = new Date(today);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  
   return tasks.filter(task => {
+    // Фильтр по дате (all, today, week)
+    let matchesDateFilter = true;
+    if (currentFilter === 'today') {
+      if (task.due_date) {
+        const dueDate = new Date(task.due_date);
+        dueDate.setHours(0, 0, 0, 0);
+        matchesDateFilter = dueDate.getTime() === today.getTime();
+      } else {
+        matchesDateFilter = false; // Без даты не показываем в "сегодня"
+      }
+    } else if (currentFilter === 'week') {
+      if (task.due_date) {
+        const dueDate = new Date(task.due_date);
+        dueDate.setHours(0, 0, 0, 0);
+        matchesDateFilter = dueDate >= today && dueDate <= weekEnd;
+      } else {
+        matchesDateFilter = false; // Без даты не показываем в "на неделе"
+      }
+    }
+    
     // Фильтр по статусу (all, open, closed, risk)
     let matchesStatusFilter = true;
     if (currentStatusFilter === 'open') {
@@ -241,7 +283,7 @@ function filterTasks(tasks) {
                       assignee.includes(searchQuery);
     }
     
-    return matchesStatusFilter && matchesSearch;
+    return matchesDateFilter && matchesStatusFilter && matchesSearch;
   });
 }
 
