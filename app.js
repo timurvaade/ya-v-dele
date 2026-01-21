@@ -114,16 +114,26 @@ function createListCard(list, tasks) {
   const head = document.createElement('div');
   head.className = 'list-card__head';
   
+  const headLeft = document.createElement('div');
+  headLeft.className = 'list-card__head-left';
+
   const title = document.createElement('h3');
   title.className = 'list-title';
   title.textContent = list.title;
+
+  const countBadge = document.createElement('span');
+  countBadge.className = 'list-count';
+  countBadge.textContent = tasks.length;
+
+  headLeft.appendChild(title);
+  headLeft.appendChild(countBadge);
 
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'toggle-btn';
   toggleBtn.textContent = '▼';
   toggleBtn.setAttribute('aria-label', 'Toggle');
 
-  head.appendChild(title);
+  head.appendChild(headLeft);
   head.appendChild(toggleBtn);
   
   // Контейнер задач

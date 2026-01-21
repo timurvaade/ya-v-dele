@@ -302,6 +302,26 @@ body {
   margin-bottom: 16px;
 }
 
+.list-card__head-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.list-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 28px;
+  padding: 0 12px;
+  background: rgba(0, 0, 0, 0.06);
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text-light);
+}
+
 .assignees {
   display: flex;
   align-items: center;
