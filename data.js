@@ -13,6 +13,7 @@ window.APP_DATA = {
           due: "today", 
           done: true,
           postponed: false,
+          description: "Обязательно купить две бутылочки, для 0 и 3/4 месяца",
           assignees: [
             { name: "Анна", avatarUrl: "https://i.pravatar.cc/80?u=anna" },
             { name: "Иван", avatarUrl: "https://i.pravatar.cc/80?u=ivan" },
@@ -58,6 +59,7 @@ window.APP_DATA = {
           due: "later", 
           done: false,
           postponed: false,
+          description: "Нужно подготовить 15 слайдов с графиками продаж за последний квартал",
           assignees: [
             { name: "Кирилл", avatarUrl: "https://i.pravatar.cc/80?u=kirill" },
             { name: "Денис", avatarUrl: "https://i.pravatar.cc/80?u=denis" }

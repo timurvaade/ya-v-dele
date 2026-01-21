@@ -279,14 +279,38 @@ function createTaskElement(task, listId) {
     taskContent.appendChild(taskLink);
   }
   
-  // Описание (если нужно)
-  const descToggle = document.createElement('button');
-  descToggle.className = 'description-toggle';
-  descToggle.textContent = 'описание ▼';
-  descToggle.addEventListener('click', () => {
-    alert('Показать описание (в разработке)');
-  });
-  taskContent.appendChild(descToggle);
+  // Блок описания (если есть)
+  if (task.description) {
+    const descBlock = document.createElement('div');
+    descBlock.className = 'description-block';
+
+    const descToggle = document.createElement('button');
+    descToggle.className = 'description-toggle';
+    descToggle.type = 'button';
+
+    const descLabel = document.createElement('span');
+    descLabel.textContent = 'описание';
+
+    const descArrow = document.createElement('span');
+    descArrow.className = 'description-arrow';
+    descArrow.textContent = '▶';
+
+    descToggle.appendChild(descLabel);
+    descToggle.appendChild(descArrow);
+
+    const descContent = document.createElement('div');
+    descContent.className = 'description-content';
+    descContent.textContent = task.description;
+
+    descToggle.addEventListener('click', () => {
+      const isOpen = descBlock.classList.toggle('is-open');
+      descArrow.textContent = isOpen ? '▼' : '▶';
+    });
+
+    descBlock.appendChild(descToggle);
+    descBlock.appendChild(descContent);
+    taskContent.appendChild(descBlock);
+  }
   
   taskDiv.appendChild(taskLeft);
   taskDiv.appendChild(taskContent);
