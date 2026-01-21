@@ -1,0 +1,24 @@
+{
+  "name": "Я в деле",
+  "short_name": "Я в деле",
+  "description": "Минималистичный таск-менеджер",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F2EFE7",
+  "theme_color": "#F2EFE7",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "icons/icon-192.svg",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/icon-512.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
