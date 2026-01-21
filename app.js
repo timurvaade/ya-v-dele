@@ -384,9 +384,13 @@ function createTaskElement(task, listId) {
     taskHeader.appendChild(pill);
   }
 
-  // Аватары ответственных (справа в заголовке задачи)
+  // Правая часть заголовка (ответственные + меню)
+  const headerRight = document.createElement('div');
+  headerRight.className = 'task-header__right';
+
+  // Аватары ответственных
   const assigneesEl = createAssignees(task.assignee);
-  if (assigneesEl) taskHeader.appendChild(assigneesEl);
+  if (assigneesEl) headerRight.appendChild(assigneesEl);
   
   // Меню задачи (dropdown)
   const menuWrapper = document.createElement('div');
@@ -464,7 +468,8 @@ function createTaskElement(task, listId) {
 
   menuWrapper.appendChild(taskMenuBtn);
   menuWrapper.appendChild(dropdown);
-  taskHeader.appendChild(menuWrapper);
+  headerRight.appendChild(menuWrapper);
+  taskHeader.appendChild(headerRight);
   
   taskContent.appendChild(taskHeader);
   
