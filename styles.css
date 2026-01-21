@@ -169,16 +169,7 @@ body {
 
 /* Section Head */
 .section-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin-bottom: 16px;
-}
-
-.section-head__left {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
+  margin-bottom: 12px;
 }
 
 .section-title {
@@ -187,49 +178,34 @@ body {
   letter-spacing: 0.8px;
   color: var(--text-light);
   text-transform: uppercase;
+  margin-bottom: 2px;
 }
 
 .section-subtitle {
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text);
-}
-
-.btn-new-list {
-  padding: 8px 12px;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: 10px;
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text-muted);
-  cursor: pointer;
-  transition: all 0.2s ease;
-  white-space: nowrap;
-}
-
-.btn-new-list:hover {
-  background: #f8f8f8;
 }
 
 /* Filters */
 .filters {
   display: flex;
-  gap: 8px;
+  gap: 6px;
   margin-bottom: 16px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .filter-btn {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  gap: 4px;
+  padding: 5px 10px;
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 16px;
+  border-radius: 14px;
   cursor: pointer;
   transition: all 0.15s ease;
+  flex-shrink: 0;
 }
 
 .filter-btn:hover {
@@ -243,7 +219,7 @@ body {
 }
 
 .filter-label {
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
   color: inherit;
 }
@@ -253,16 +229,16 @@ body {
 }
 
 .filter-count {
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
-  min-width: 20px;
-  height: 20px;
+  min-width: 18px;
+  height: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
   background: rgba(0, 0, 0, 0.08);
-  border-radius: 10px;
-  padding: 0 6px;
+  border-radius: 9px;
+  padding: 0 5px;
 }
 
 .filter-btn.is-active .filter-count {
