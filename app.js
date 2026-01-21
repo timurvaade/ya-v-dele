@@ -218,18 +218,41 @@ function renderLists() {
   window.APP_DATA.lists.forEach(list => {
     const filteredTasks = filterTasks(list.items);
     
-    // Не показываем список, если в нём нет задач после фильтрации
-    if (filteredTasks.length === 0) return;
+    // Проверяем, совпадает ли название списка с поиском
+    const listTitleMatches = searchQuery && 
+      list.title.toLowerCase().includes(searchQuery);
     
-    const listCard = createListCard(list, filteredTasks);
+    // Показываем список если:
+    // 1. Есть задачи после фильтрации, ИЛИ
+    // 2. Название списка совпадает с поиском (тогда показываем все задачи по статусу)
+    let tasksToShow = filteredTasks;
+    if (listTitleMatches && filteredTasks.length === 0) {
+      // Если название совпало, но задач нет — показываем задачи без поискового фильтра
+      tasksToShow = filterTasksByStatus(list.items);
+    }
+    
+    if (tasksToShow.length === 0 && !listTitleMatches) return;
+    
+    // Автораскрытие при поиске
+    const autoExpand = !!searchQuery;
+    const listCard = createListCard(list, tasksToShow, autoExpand);
     container.appendChild(listCard);
   });
 }
 
+// Фильтрация только по статусу (без поиска)
+function filterTasksByStatus(tasks) {
+  return tasks.filter(task => {
+    if (currentStatusFilter === 'all') return true;
+    return task.status === currentStatusFilter;
+  });
+}
+
 // Создание карточки списка
-function createListCard(list, tasks) {
+function createListCard(list, tasks, autoExpand = false) {
   const card = document.createElement('div');
   card.className = 'list-card';
+  if (autoExpand) card.classList.add('is-expanded');
   card.dataset.listId = list.id;
   
   // Заголовок списка
@@ -261,7 +284,7 @@ function createListCard(list, tasks) {
   // Контейнер задач
   const tasksContainer = document.createElement('div');
   tasksContainer.className = 'tasks';
-  tasksContainer.style.display = 'none'; // По умолчанию скрыто
+  tasksContainer.style.display = autoExpand ? 'flex' : 'none';
   
   tasks.forEach(task => {
     const taskElement = createTaskElement(task, list.id);
