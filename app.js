@@ -706,47 +706,50 @@ function createTaskElement(task, listId) {
   }
   
   // Блок описания
+  const descBlock = document.createElement('div');
+  descBlock.className = 'description-block';
+
   if (task.description) {
-    const descBlock = document.createElement('div');
-    descBlock.className = 'description-block';
+    // Текст описания
+    const descText = document.createElement('span');
+    descText.className = 'description-text';
+    descText.textContent = task.description;
+    descBlock.appendChild(descText);
 
-    const descToggle = document.createElement('button');
-    descToggle.className = 'description-toggle';
-    descToggle.type = 'button';
-
-    const descLabel = document.createElement('span');
-    descLabel.textContent = 'описание';
-
+    // Стрелка (видна только если текст не влезает)
     const descArrow = document.createElement('span');
     descArrow.className = 'description-arrow';
     descArrow.textContent = '▶';
+    descBlock.appendChild(descArrow);
 
-    descToggle.appendChild(descLabel);
-    descToggle.appendChild(descArrow);
-
-    const descContent = document.createElement('div');
-    descContent.className = 'description-content';
-    descContent.textContent = task.description;
-
-    descToggle.addEventListener('click', () => {
-      const isOpen = descBlock.classList.toggle('is-open');
-      descArrow.textContent = isOpen ? '▼' : '▶';
+    // Проверяем overflow после рендера
+    requestAnimationFrame(() => {
+      if (descText.scrollWidth > descText.clientWidth) {
+        descBlock.classList.add('has-overflow');
+      }
     });
 
-    descBlock.appendChild(descToggle);
-    descBlock.appendChild(descContent);
-    taskContent.appendChild(descBlock);
+    descBlock.addEventListener('click', () => {
+      if (descBlock.classList.contains('has-overflow') || descBlock.classList.contains('is-open')) {
+        const isOpen = descBlock.classList.toggle('is-open');
+        descArrow.textContent = isOpen ? '▼' : '▶';
+      }
+    });
   } else {
     // Кнопка "добавить описание"
+    descBlock.classList.add('is-empty');
     const addDescBtn = document.createElement('button');
     addDescBtn.className = 'add-desc-btn';
     addDescBtn.type = 'button';
     addDescBtn.textContent = '+ добавить описание';
-    addDescBtn.addEventListener('click', () => {
-      showAddDescriptionInput(task, taskContent, addDescBtn);
+    addDescBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showAddDescriptionInput(task, taskContent, descBlock);
     });
-    taskContent.appendChild(addDescBtn);
+    descBlock.appendChild(addDescBtn);
   }
+
+  taskContent.appendChild(descBlock);
   
   taskDiv.appendChild(taskLeft);
   taskDiv.appendChild(taskContent);
@@ -755,8 +758,8 @@ function createTaskElement(task, listId) {
 }
 
 // Показать инпут для добавления описания
-function showAddDescriptionInput(task, taskContent, addDescBtn) {
-  addDescBtn.style.display = 'none';
+function showAddDescriptionInput(task, taskContent, descBlock) {
+  descBlock.style.display = 'none';
 
   const inputWrapper = document.createElement('div');
   inputWrapper.className = 'add-desc-wrapper';
@@ -800,7 +803,7 @@ function showAddDescriptionInput(task, taskContent, addDescBtn) {
 
   const cancel = () => {
     inputWrapper.remove();
-    addDescBtn.style.display = '';
+    descBlock.style.display = '';
   };
 
   saveBtn.addEventListener('click', save);
