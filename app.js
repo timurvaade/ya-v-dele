@@ -716,23 +716,23 @@ function createTaskElement(task, listId) {
     descText.textContent = task.description;
     descBlock.appendChild(descText);
 
+    // Иконка редактирования (всегда видна)
+    const editIcon = document.createElement('button');
+    editIcon.className = 'description-edit-icon';
+    editIcon.type = 'button';
+    editIcon.innerHTML = '✎';
+    editIcon.title = 'Редактировать';
+    editIcon.addEventListener('click', (e) => {
+      e.stopPropagation();
+      showEditDescriptionInput(task, descBlock, descText);
+    });
+    descBlock.appendChild(editIcon);
+
     // Стрелка (скрыта по умолчанию, видна только если overflow)
     const descArrow = document.createElement('span');
     descArrow.className = 'description-arrow';
     descArrow.textContent = '▼'; // вниз = развернуть
     descBlock.appendChild(descArrow);
-
-    // Кнопка редактирования (видна когда раскрыто)
-    const editBtn = document.createElement('button');
-    editBtn.className = 'description-edit';
-    editBtn.type = 'button';
-    editBtn.textContent = 'редактировать';
-    editBtn.style.display = 'none';
-    editBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      showEditDescriptionInput(task, descBlock, descText);
-    });
-    descBlock.appendChild(editBtn);
 
     // Проверяем overflow после рендера
     setTimeout(() => {
@@ -741,12 +741,13 @@ function createTaskElement(task, listId) {
       }
     }, 0);
 
-    descBlock.addEventListener('click', () => {
+    descBlock.addEventListener('click', (e) => {
+      // Не раскрываем если клик на иконку редактирования
+      if (e.target.closest('.description-edit-icon')) return;
       if (!descBlock.classList.contains('has-overflow') && !descBlock.classList.contains('is-open')) return;
       
       const isOpen = descBlock.classList.toggle('is-open');
       descArrow.textContent = isOpen ? '▲' : '▼'; // вверх = свернуть
-      editBtn.style.display = isOpen ? 'inline-block' : 'none';
     });
   } else {
     // Кнопка "добавить описание"

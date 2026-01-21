@@ -679,13 +679,39 @@ body {
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
-  padding-right: 24px;
+  padding-right: 56px; /* место для иконки и стрелки */
+}
+
+.description-edit-icon {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text-light);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+}
+
+.description-edit-icon:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
 }
 
 .description-arrow {
   position: absolute;
-  right: 16px;
-  top: 12px;
+  right: 40px;
+  top: 50%;
+  transform: translateY(-50%);
   font-size: 10px;
   color: var(--text-light);
   display: none;
@@ -701,21 +727,9 @@ body {
   display: block;
 }
 
-/* Кнопка редактирования */
-.description-edit {
-  display: inline-block;
-  margin-top: 8px;
-  padding: 0;
-  background: none;
-  border: none;
-  font-size: 13px;
-  color: var(--accent-blue);
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-}
-
-.description-edit:hover {
-  opacity: 0.7;
+.description-block.is-open .description-edit-icon {
+  top: 12px;
+  transform: none;
 }
 
 /* Пустое описание */
