@@ -10,6 +10,7 @@ document.addEventListener('DOMContentLoaded', () => {
   initFilters();
   initSearch();
   initFAB();
+  initCurrentDate();
   renderLists();
   updateCounts();
 
@@ -146,6 +147,23 @@ function initFAB() {
   fab.addEventListener('click', () => {
     alert('Создание новой задачи (в разработке)');
   });
+}
+
+// Инициализация текущей даты
+function initCurrentDate() {
+  const dateEl = document.getElementById('current-date');
+  if (!dateEl) return;
+
+  const now = new Date();
+  const days = ['воскресенье', 'понедельник', 'вторник', 'среда', 'четверг', 'пятница', 'суббота'];
+  const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 
+                  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  
+  const dayName = days[now.getDay()];
+  const day = now.getDate();
+  const month = months[now.getMonth()];
+  
+  dateEl.textContent = `${dayName}, ${day} ${month}`;
 }
 
 // Проверка, является ли дата "сегодня"
