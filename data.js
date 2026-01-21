@@ -4,12 +4,6 @@ window.APP_DATA = {
     {
       id: "shopping",
       title: "Список покупок",
-      assignees: [
-        { name: "Анна Петрова", initials: "АП" },
-        { name: "Иван Смирнов", initials: "ИС" },
-        { name: "Лена Карпова", initials: "ЛК" },
-        { name: "Мария Орлова", initials: "МО" }
-      ],
       items: [
         { 
           id: "t1", 
@@ -18,7 +12,15 @@ window.APP_DATA = {
           link: true, 
           due: "today", 
           done: true,
-          postponed: false
+          postponed: false,
+          assignees: [
+            { name: "Анна", avatarUrl: "https://i.pravatar.cc/80?u=anna" },
+            { name: "Иван", avatarUrl: "https://i.pravatar.cc/80?u=ivan" },
+            { name: "Лена", avatarUrl: "https://i.pravatar.cc/80?u=lena" },
+            { name: "Мария", avatarUrl: "https://i.pravatar.cc/80?u=maria" },
+            { name: "Петр", avatarUrl: "https://i.pravatar.cc/80?u=petr" },
+            { name: "Олег", avatarUrl: "https://i.pravatar.cc/80?u=oleg" }
+          ]
         },
         { 
           id: "t2", 
@@ -27,7 +29,10 @@ window.APP_DATA = {
           link: false, 
           due: "today", 
           done: false,
-          postponed: false
+          postponed: false,
+          assignees: [
+            { name: "Сергей", avatarUrl: "https://i.pravatar.cc/80?u=sergey" }
+          ]
         },
         { 
           id: "t3", 
@@ -36,17 +41,14 @@ window.APP_DATA = {
           link: false, 
           due: "today", 
           done: false,
-          postponed: false
+          postponed: false,
+          assignees: []
         }
       ]
     },
     {
       id: "linko",
       title: "Linko",
-      assignees: [
-        { name: "Сергей Лебедев", initials: "СЛ" },
-        { name: "Кирилл Соколов", initials: "КС" }
-      ],
       items: [
         { 
           id: "t4", 
@@ -55,7 +57,11 @@ window.APP_DATA = {
           link: false, 
           due: "later", 
           done: false,
-          postponed: false
+          postponed: false,
+          assignees: [
+            { name: "Кирилл", avatarUrl: "https://i.pravatar.cc/80?u=kirill" },
+            { name: "Денис", avatarUrl: "https://i.pravatar.cc/80?u=denis" }
+          ]
         },
         { 
           id: "t5", 
@@ -64,18 +70,19 @@ window.APP_DATA = {
           link: false, 
           due: "later", 
           done: false,
-          postponed: false
+          postponed: false,
+          assignees: [
+            { name: "Марина", avatarUrl: "https://i.pravatar.cc/80?u=marina" },
+            { name: "Влад", avatarUrl: "https://i.pravatar.cc/80?u=vlad" },
+            { name: "Катя", avatarUrl: "https://i.pravatar.cc/80?u=katya" },
+            { name: "Роман", avatarUrl: "https://i.pravatar.cc/80?u=roman" }
+          ]
         }
       ]
     },
     {
       id: "tamga",
       title: "Tamga",
-      assignees: [
-        { name: "Андрей Егоров", initials: "АЕ" },
-        { name: "Марина Фролова", initials: "МФ" },
-        { name: "Денис Попов", initials: "ДП" }
-      ],
       items: [
         { 
           id: "t6", 
@@ -84,7 +91,10 @@ window.APP_DATA = {
           link: false, 
           due: "later", 
           done: false,
-          postponed: false
+          postponed: false,
+          assignees: [
+            { name: "Андрей", avatarUrl: "https://i.pravatar.cc/80?u=andrey" }
+          ]
         },
         { 
           id: "t7", 
@@ -93,16 +103,18 @@ window.APP_DATA = {
           link: false, 
           due: "later", 
           done: false,
-          postponed: true
+          postponed: true,
+          assignees: [
+            { name: "Тимур", avatarUrl: "https://i.pravatar.cc/80?u=timur" },
+            { name: "Олег", avatarUrl: "https://i.pravatar.cc/80?u=oleg2" },
+            { name: "Саша", avatarUrl: "https://i.pravatar.cc/80?u=sasha" }
+          ]
         }
       ]
     },
     {
       id: "nio",
       title: "Nio",
-      assignees: [
-        { name: "Влад Ким", initials: "ВК" }
-      ],
       items: [
         { 
           id: "t8", 
@@ -111,19 +123,16 @@ window.APP_DATA = {
           link: false, 
           due: "today", 
           done: false,
-          postponed: false
+          postponed: false,
+          assignees: [
+            { name: "Влад", avatarUrl: "https://i.pravatar.cc/80?u=vlad2" }
+          ]
         }
       ]
     },
     {
       id: "exhibition",
       title: "Выставка",
-      assignees: [
-        { name: "Катя Иванова", initials: "КИ" },
-        { name: "Роман Белов", initials: "РБ" },
-        { name: "Тимур Саидов", initials: "ТС" },
-        { name: "Олег Савин", initials: "ОС" }
-      ],
       items: [
         { 
           id: "t9", 
@@ -132,7 +141,14 @@ window.APP_DATA = {
           link: false, 
           due: "later", 
           done: false,
-          postponed: false
+          postponed: false,
+          assignees: [
+            { name: "Катя", avatarUrl: "https://i.pravatar.cc/80?u=katya2" },
+            { name: "Роман", avatarUrl: "https://i.pravatar.cc/80?u=roman2" },
+            { name: "Тимур", avatarUrl: "https://i.pravatar.cc/80?u=timur2" },
+            { name: "Олег", avatarUrl: "https://i.pravatar.cc/80?u=oleg3" },
+            { name: "Саша", avatarUrl: "https://i.pravatar.cc/80?u=sasha2" }
+          ]
         }
       ]
     }

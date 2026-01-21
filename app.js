@@ -117,21 +117,14 @@ function createListCard(list, tasks) {
   const title = document.createElement('h3');
   title.className = 'list-title';
   title.textContent = list.title;
-  
-  const headRight = document.createElement('div');
-  headRight.className = 'list-card__head-right';
 
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'toggle-btn';
   toggleBtn.textContent = '▼';
   toggleBtn.setAttribute('aria-label', 'Toggle');
 
-  const assigneesEl = createAssignees(list.assignees);
-  if (assigneesEl) headRight.appendChild(assigneesEl);
-  headRight.appendChild(toggleBtn);
-
   head.appendChild(title);
-  head.appendChild(headRight);
+  head.appendChild(toggleBtn);
   
   // Контейнер задач
   const tasksContainer = document.createElement('div');
@@ -241,6 +234,10 @@ function createTaskElement(task, listId) {
     pill.textContent = task.tag;
     taskHeader.appendChild(pill);
   }
+
+  // Аватары ответственных (справа в заголовке задачи)
+  const assigneesEl = createAssignees(task.assignees);
+  if (assigneesEl) taskHeader.appendChild(assigneesEl);
   
   const taskMenu = document.createElement('button');
   taskMenu.className = 'task-menu';
