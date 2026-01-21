@@ -1,6 +1,6 @@
 // Глобальное состояние
-let currentFilter = 'today'; // all, today, later
-let currentStatusFilter = 'all'; // all, open, closed, postponed
+let currentFilter = 'all'; // all, today, week, later
+let currentStatusFilter = 'all'; // all, open, closed, risk
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', () => {
@@ -114,7 +114,7 @@ function initFilters() {
       if (filterText === 'все') currentStatusFilter = 'all';
       else if (filterText === 'открыто') currentStatusFilter = 'open';
       else if (filterText === 'закрыто') currentStatusFilter = 'closed';
-      else if (filterText === 'отложено') currentStatusFilter = 'postponed';
+      else if (filterText === 'в риске') currentStatusFilter = 'risk';
       // Перерисовываем списки
       renderLists();
     });
@@ -125,32 +125,51 @@ function initFilters() {
 function initFAB() {
   const fab = document.querySelector('.fab');
   fab.addEventListener('click', () => {
-    alert('Создание нового списка (в разработке)');
+    alert('Создание новой задачи (в разработке)');
   });
+}
+
+// Проверка, является ли дата "сегодня"
+function isToday(dateStr) {
+  if (!dateStr) return false;
+  const today = new Date();
+  const date = new Date(dateStr);
+  return date.toDateString() === today.toDateString();
+}
+
+// Проверка, является ли дата "на этой неделе"
+function isThisWeek(dateStr) {
+  if (!dateStr) return false;
+  const today = new Date();
+  const date = new Date(dateStr);
+  const weekFromNow = new Date(today);
+  weekFromNow.setDate(today.getDate() + 7);
+  return date >= today && date <= weekFromNow;
+}
+
+// Форматирование даты для отображения
+function formatDate(dateStr) {
+  if (!dateStr) return '';
+  const date = new Date(dateStr);
+  const months = ['января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 
+                  'июля', 'августа', 'сентября', 'октября', 'ноября', 'декабря'];
+  return `${date.getDate()} ${months[date.getMonth()]}`;
 }
 
 // Фильтрация задач по текущему фильтру
 function filterTasks(tasks) {
   return tasks.filter(task => {
-    // Фильтр по времени (all, today, later)
-    let matchesTimeFilter = true;
-    if (currentFilter === 'today') {
-      matchesTimeFilter = task.due === 'today';
-    } else if (currentFilter === 'later') {
-      matchesTimeFilter = task.due === 'later';
-    }
-    
-    // Фильтр по статусу (all, open, closed, postponed)
+    // Фильтр по статусу (all, open, closed, risk)
     let matchesStatusFilter = true;
     if (currentStatusFilter === 'open') {
-      matchesStatusFilter = !task.done && !task.postponed;
+      matchesStatusFilter = task.status === 'open';
     } else if (currentStatusFilter === 'closed') {
-      matchesStatusFilter = task.done;
-    } else if (currentStatusFilter === 'postponed') {
-      matchesStatusFilter = task.postponed;
+      matchesStatusFilter = task.status === 'closed';
+    } else if (currentStatusFilter === 'risk') {
+      matchesStatusFilter = task.status === 'risk';
     }
     
-    return matchesTimeFilter && matchesStatusFilter;
+    return matchesStatusFilter;
   });
 }
 
@@ -230,36 +249,34 @@ function createListCard(list, tasks) {
   return card;
 }
 
+// Парсинг строки assignee в массив объектов
+function parseAssignees(assigneeStr) {
+  if (!assigneeStr || !assigneeStr.trim()) return [];
+  return assigneeStr.split(',').map(name => ({
+    name: name.trim()
+  }));
+}
+
 // Создание блока ответственных
-function createAssignees(assignees = []) {
+function createAssignees(assigneeStr) {
+  const assignees = parseAssignees(assigneeStr);
   if (!assignees.length) return null;
 
   const container = document.createElement('div');
   container.className = 'assignees';
 
-  const maxVisible = 3;
+  const maxVisible = 2;
   const visibleAssignees = assignees.slice(0, maxVisible);
 
   visibleAssignees.forEach(person => {
     const avatar = document.createElement('button');
     avatar.className = 'avatar';
     avatar.type = 'button';
-    avatar.title = person.name || 'Ответственный';
+    avatar.title = person.name;
 
-    const initials = (person.initials || person.name || '?')
-      .trim()
-      .split(/\s+/)
-      .map(part => part[0])
-      .join('')
-      .toUpperCase()
-      .slice(0, 2) || '?';
-
-    avatar.textContent = initials;
-
-    if (person.avatarUrl) {
-      avatar.style.backgroundImage = `url(${person.avatarUrl})`;
-      avatar.classList.add('avatar--image');
-    }
+    // Берём первую букву имени
+    const initial = person.name.charAt(0).toUpperCase();
+    avatar.textContent = initial;
 
     container.appendChild(avatar);
   });
@@ -330,7 +347,8 @@ function startInlineEdit(titleLabel, task) {
 function createTaskElement(task, listId) {
   const taskDiv = document.createElement('div');
   taskDiv.className = 'task';
-  if (task.done) taskDiv.classList.add('is-completed');
+  if (task.status === 'closed') taskDiv.classList.add('is-completed');
+  if (task.status === 'risk') taskDiv.classList.add('is-risk');
   
   // Левая часть (чекбокс)
   const taskLeft = document.createElement('div');
@@ -339,12 +357,13 @@ function createTaskElement(task, listId) {
   const checkbox = document.createElement('input');
   checkbox.type = 'checkbox';
   checkbox.className = 'checkbox';
-  checkbox.id = task.id;
-  checkbox.checked = task.done;
+  checkbox.id = `task-${task.id}`;
+  checkbox.checked = task.status === 'closed';
   
   checkbox.addEventListener('change', () => {
-    task.done = checkbox.checked;
-    taskDiv.classList.toggle('is-completed', task.done);
+    task.status = checkbox.checked ? 'closed' : 'open';
+    taskDiv.classList.toggle('is-completed', task.status === 'closed');
+    taskDiv.classList.remove('is-risk');
     updateCounts();
   });
   
@@ -354,19 +373,19 @@ function createTaskElement(task, listId) {
   const taskContent = document.createElement('div');
   taskContent.className = 'task__content';
   
-  // Заголовок с тегом и меню
+  // Заголовок с категорией и меню
   const taskHeader = document.createElement('div');
   taskHeader.className = 'task-header';
   
-  if (task.tag) {
+  if (task.category) {
     const pill = document.createElement('span');
-    pill.className = `pill pill--${getTagColor(task.tag)}`;
-    pill.textContent = task.tag;
+    pill.className = `pill pill--${getCategoryColor(task.category)}`;
+    pill.textContent = task.category;
     taskHeader.appendChild(pill);
   }
 
   // Аватары ответственных (справа в заголовке задачи)
-  const assigneesEl = createAssignees(task.assignees);
+  const assigneesEl = createAssignees(task.assignee);
   if (assigneesEl) taskHeader.appendChild(assigneesEl);
   
   // Меню задачи (dropdown)
@@ -395,14 +414,14 @@ function createTaskElement(task, listId) {
     startInlineEdit(titleLabel, task);
   });
 
-  // Пункт: Отложить / Вернуть
-  const postponeBtn = document.createElement('button');
-  postponeBtn.className = 'task-dropdown__item';
-  postponeBtn.type = 'button';
-  postponeBtn.innerHTML = task.postponed ? '▶️ Вернуть в работу' : '⏸️ Отложить';
-  postponeBtn.addEventListener('click', () => {
+  // Пункт: В риске / Убрать из риска
+  const riskBtn = document.createElement('button');
+  riskBtn.className = 'task-dropdown__item';
+  riskBtn.type = 'button';
+  riskBtn.innerHTML = task.status === 'risk' ? '✅ Убрать из риска' : '⚠️ В риске';
+  riskBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
-    task.postponed = !task.postponed;
+    task.status = task.status === 'risk' ? 'open' : 'risk';
     renderLists();
     updateCounts();
   });
@@ -433,7 +452,7 @@ function createTaskElement(task, listId) {
   });
 
   dropdown.appendChild(editBtn);
-  dropdown.appendChild(postponeBtn);
+  dropdown.appendChild(riskBtn);
   dropdown.appendChild(deleteBtn);
 
   taskMenuBtn.addEventListener('click', (e) => {
@@ -452,20 +471,26 @@ function createTaskElement(task, listId) {
   // Название задачи
   const taskTitle = document.createElement('label');
   taskTitle.className = 'task-title';
-  taskTitle.setAttribute('for', task.id);
+  taskTitle.setAttribute('for', `task-${task.id}`);
   taskTitle.textContent = task.title;
   taskContent.appendChild(taskTitle);
+
+  // Дата (если есть)
+  if (task.due_date) {
+    const dueDateEl = document.createElement('span');
+    dueDateEl.className = 'task-due-date';
+    dueDateEl.textContent = formatDate(task.due_date);
+    taskContent.appendChild(dueDateEl);
+  }
   
   // Ссылка (если есть)
   if (task.link) {
     const taskLink = document.createElement('a');
     taskLink.className = 'task-link-ref';
-    taskLink.href = '#';
+    taskLink.href = task.link;
+    taskLink.target = '_blank';
+    taskLink.rel = 'noopener noreferrer';
     taskLink.textContent = 'ссылка';
-    taskLink.addEventListener('click', (e) => {
-      e.preventDefault();
-      alert('Переход по ссылке (в разработке)');
-    });
     taskContent.appendChild(taskLink);
   }
   
@@ -508,8 +533,8 @@ function createTaskElement(task, listId) {
   return taskDiv;
 }
 
-// Получение цвета тега
-function getTagColor(tag) {
+// Получение цвета категории
+function getCategoryColor(category) {
   const colors = {
     'Питание': 'blue',
     'Личное': 'blue',
@@ -520,10 +545,10 @@ function getTagColor(tag) {
     'Конференция': 'green',
     'Таргет': 'brown',
     'Футболки': 'red',
-    'встреча': 'teal',
-    'презентация': 'violet'
+    'Встреча': 'teal',
+    'Презентация': 'violet'
   };
-  return colors[tag] || 'blue';
+  return colors[category] || 'blue';
 }
 
 // Обновление счётчиков
@@ -533,15 +558,13 @@ function updateCounts() {
   let totalAll = 0;
   let totalOpen = 0;
   let totalClosed = 0;
-  let totalPostponed = 0;
+  let totalRisk = 0;
   
   window.APP_DATA.lists.forEach(list => {
-    const filteredTasks = filterTasks(list.items);
-    totalAll += filteredTasks.length;
-    
-    filteredTasks.forEach(task => {
-      if (task.done) totalClosed++;
-      else if (task.postponed) totalPostponed++;
+    list.items.forEach(task => {
+      totalAll++;
+      if (task.status === 'closed') totalClosed++;
+      else if (task.status === 'risk') totalRisk++;
       else totalOpen++;
     });
   });
@@ -555,6 +578,6 @@ function updateCounts() {
     if (label === 'все') count.textContent = totalAll;
     else if (label === 'открыто') count.textContent = totalOpen;
     else if (label === 'закрыто') count.textContent = totalClosed;
-    else if (label === 'отложено') count.textContent = totalPostponed;
+    else if (label === 'в риске') count.textContent = totalRisk;
   });
 }

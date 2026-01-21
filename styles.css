@@ -536,6 +536,16 @@ body {
   color: var(--text-muted);
 }
 
+.task.is-risk {
+  border-left: 3px solid var(--accent-red);
+  padding-left: 13px;
+}
+
+.task-due-date {
+  font-size: 13px;
+  color: var(--text-light);
+}
+
 .task-title-input {
   font-size: 20px;
   font-weight: 600;

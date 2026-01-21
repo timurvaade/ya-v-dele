@@ -1,4 +1,4 @@
-// Демо-данные для приложения
+// Демо-данные для приложения (структура соответствует Google Sheets)
 window.APP_DATA = {
   lists: [
     {
@@ -6,44 +6,37 @@ window.APP_DATA = {
       title: "Список покупок",
       items: [
         { 
-          id: "t1", 
+          id: "17000001", 
           title: "Антиколиковая бутылочка 240 мл", 
-          tag: "Питание", 
-          link: true, 
-          due: "today", 
-          done: true,
-          postponed: false,
+          category: "Питание", 
+          status: "closed",
           description: "Обязательно купить две бутылочки, для 0 и 3/4 месяца",
-          assignees: [
-            { name: "Анна", avatarUrl: "https://i.pravatar.cc/80?u=anna" },
-            { name: "Иван", avatarUrl: "https://i.pravatar.cc/80?u=ivan" },
-            { name: "Лена", avatarUrl: "https://i.pravatar.cc/80?u=lena" },
-            { name: "Мария", avatarUrl: "https://i.pravatar.cc/80?u=maria" },
-            { name: "Петр", avatarUrl: "https://i.pravatar.cc/80?u=petr" },
-            { name: "Олег", avatarUrl: "https://i.pravatar.cc/80?u=oleg" }
-          ]
+          link: "https://ozon.ru/product/123",
+          assignee: "Анна, Иван, Лена, Мария, Петр, Олег",
+          due_date: "2025-01-25",
+          created_at: "2025-01-20"
         },
         { 
-          id: "t2", 
+          id: "17000002", 
           title: "Детское питание NAN", 
-          tag: "Питание", 
-          link: false, 
-          due: "today", 
-          done: false,
-          postponed: false,
-          assignees: [
-            { name: "Сергей", avatarUrl: "https://i.pravatar.cc/80?u=sergey" }
-          ]
+          category: "Питание", 
+          status: "open",
+          description: "",
+          link: "",
+          assignee: "Сергей",
+          due_date: "2025-01-26",
+          created_at: "2025-01-20"
         },
         { 
-          id: "t3", 
+          id: "17000003", 
           title: "Памперсы размер 3", 
-          tag: "Личное", 
-          link: false, 
-          due: "today", 
-          done: false,
-          postponed: false,
-          assignees: []
+          category: "Личное", 
+          status: "risk",
+          description: "Срочно нужны, заканчиваются",
+          link: "",
+          assignee: "",
+          due_date: "2025-01-22",
+          created_at: "2025-01-18"
         }
       ]
     },
@@ -52,33 +45,26 @@ window.APP_DATA = {
       title: "Linko",
       items: [
         { 
-          id: "t4", 
+          id: "17000004", 
           title: "Подготовить презентацию", 
-          tag: "Конференция", 
-          link: false, 
-          due: "later", 
-          done: false,
-          postponed: false,
+          category: "Конференция", 
+          status: "open",
           description: "Нужно подготовить 15 слайдов с графиками продаж за последний квартал",
-          assignees: [
-            { name: "Кирилл", avatarUrl: "https://i.pravatar.cc/80?u=kirill" },
-            { name: "Денис", avatarUrl: "https://i.pravatar.cc/80?u=denis" }
-          ]
+          link: "",
+          assignee: "Кирилл, Денис",
+          due_date: "2025-02-01",
+          created_at: "2025-01-15"
         },
         { 
-          id: "t5", 
+          id: "17000005", 
           title: "Настроить таргетинг", 
-          tag: "Таргет", 
-          link: false, 
-          due: "later", 
-          done: false,
-          postponed: false,
-          assignees: [
-            { name: "Марина", avatarUrl: "https://i.pravatar.cc/80?u=marina" },
-            { name: "Влад", avatarUrl: "https://i.pravatar.cc/80?u=vlad" },
-            { name: "Катя", avatarUrl: "https://i.pravatar.cc/80?u=katya" },
-            { name: "Роман", avatarUrl: "https://i.pravatar.cc/80?u=roman" }
-          ]
+          category: "Таргет", 
+          status: "risk",
+          description: "",
+          link: "",
+          assignee: "Марина, Влад, Катя, Роман",
+          due_date: "2025-01-28",
+          created_at: "2025-01-10"
         }
       ]
     },
@@ -87,30 +73,26 @@ window.APP_DATA = {
       title: "Tamga",
       items: [
         { 
-          id: "t6", 
+          id: "17000006", 
           title: "Заказать футболки с логотипом", 
-          tag: "Футболки", 
-          link: false, 
-          due: "later", 
-          done: false,
-          postponed: false,
-          assignees: [
-            { name: "Андрей", avatarUrl: "https://i.pravatar.cc/80?u=andrey" }
-          ]
+          category: "Футболки", 
+          status: "open",
+          description: "",
+          link: "https://printbar.ru/order/456",
+          assignee: "Андрей",
+          due_date: "2025-02-10",
+          created_at: "2025-01-12"
         },
         { 
-          id: "t7", 
+          id: "17000007", 
           title: "Запустить рекламную кампанию", 
-          tag: "Таргет", 
-          link: false, 
-          due: "later", 
-          done: false,
-          postponed: true,
-          assignees: [
-            { name: "Тимур", avatarUrl: "https://i.pravatar.cc/80?u=timur" },
-            { name: "Олег", avatarUrl: "https://i.pravatar.cc/80?u=oleg2" },
-            { name: "Саша", avatarUrl: "https://i.pravatar.cc/80?u=sasha" }
-          ]
+          category: "Таргет", 
+          status: "risk",
+          description: "Бюджет согласован, ждём креативы",
+          link: "",
+          assignee: "Тимур, Олег, Саша",
+          due_date: "2025-01-30",
+          created_at: "2025-01-08"
         }
       ]
     },
@@ -119,16 +101,15 @@ window.APP_DATA = {
       title: "Nio",
       items: [
         { 
-          id: "t8", 
+          id: "17000008", 
           title: "Встреча с клиентом", 
-          tag: "встреча", 
-          link: false, 
-          due: "today", 
-          done: false,
-          postponed: false,
-          assignees: [
-            { name: "Влад", avatarUrl: "https://i.pravatar.cc/80?u=vlad2" }
-          ]
+          category: "Встреча", 
+          status: "open",
+          description: "",
+          link: "https://meet.google.com/abc-defg-hij",
+          assignee: "Влад",
+          due_date: "2025-01-27",
+          created_at: "2025-01-21"
         }
       ]
     },
@@ -137,20 +118,15 @@ window.APP_DATA = {
       title: "Выставка",
       items: [
         { 
-          id: "t9", 
+          id: "17000009", 
           title: "Подготовить презентацию стенда", 
-          tag: "презентация", 
-          link: false, 
-          due: "later", 
-          done: false,
-          postponed: false,
-          assignees: [
-            { name: "Катя", avatarUrl: "https://i.pravatar.cc/80?u=katya2" },
-            { name: "Роман", avatarUrl: "https://i.pravatar.cc/80?u=roman2" },
-            { name: "Тимур", avatarUrl: "https://i.pravatar.cc/80?u=timur2" },
-            { name: "Олег", avatarUrl: "https://i.pravatar.cc/80?u=oleg3" },
-            { name: "Саша", avatarUrl: "https://i.pravatar.cc/80?u=sasha2" }
-          ]
+          category: "Презентация", 
+          status: "open",
+          description: "Дизайн утверждён, нужно напечатать",
+          link: "",
+          assignee: "Катя, Роман, Тимур, Олег, Саша",
+          due_date: "2025-03-01",
+          created_at: "2025-01-05"
         }
       ]
     }
