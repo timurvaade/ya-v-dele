@@ -102,11 +102,12 @@ body {
 
 .search {
   flex: 1;
+  position: relative;
 }
 
 .search input {
   width: 100%;
-  padding: 12px 16px;
+  padding: 12px 40px 12px 16px;
   background: var(--white);
   border: none;
   border-radius: 12px;
@@ -123,6 +124,33 @@ body {
 .search input:focus {
   outline: none;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.08), 0 0 0 2px rgba(74, 144, 226, 0.15);
+}
+
+.search-clear {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 28px;
+  height: 28px;
+  background: rgba(0, 0, 0, 0.08);
+  border: none;
+  border-radius: 50%;
+  font-size: 16px;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s ease;
+}
+
+.search-clear:hover {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.search-clear.is-visible {
+  display: flex;
 }
 
 /* Tabs */
@@ -667,6 +695,78 @@ body {
   display: block;
 }
 
+/* Add Description */
+.add-desc-btn {
+  background: none;
+  border: none;
+  font-size: 13px;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.add-desc-btn:hover {
+  color: var(--text-muted);
+}
+
+.add-desc-wrapper {
+  margin-top: 8px;
+}
+
+.add-desc-input {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--accent-blue);
+  border-radius: 10px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text);
+  resize: none;
+  outline: none;
+  background: var(--white);
+}
+
+.add-desc-input::placeholder {
+  color: var(--text-light);
+}
+
+.add-desc-buttons {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.add-desc-save,
+.add-desc-cancel {
+  padding: 8px 16px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+.add-desc-cancel {
+  background: rgba(0, 0, 0, 0.06);
+  color: var(--text-muted);
+}
+
+.add-desc-cancel:hover {
+  background: rgba(0, 0, 0, 0.1);
+}
+
+.add-desc-save {
+  background: var(--accent-blue);
+  color: white;
+}
+
+.add-desc-save:hover {
+  background: #3a7bc8;
+}
+
 /* Pills (Tags) */
 .pill {
   display: inline-block;
@@ -701,7 +801,9 @@ body {
   background: var(--fab-bg);
   border: none;
   border-radius: 50%;
-  font-size: 28px;
+  font-size: 32px;
+  font-weight: 300;
+  line-height: 1;
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
@@ -710,6 +812,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  padding-bottom: 2px; /* оптическая компенсация */
 }
 
 .fab:hover {

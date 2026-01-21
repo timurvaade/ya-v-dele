@@ -22,18 +22,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Инициализация поиска
 function initSearch() {
-  const searchInput = document.querySelector('.search input');
+  const searchInput = document.getElementById('search-input');
+  const clearBtn = document.getElementById('search-clear');
   if (!searchInput) return;
 
   let debounceTimer;
-  searchInput.addEventListener('input', (e) => {
+  
+  const updateSearch = () => {
+    searchQuery = searchInput.value.trim().toLowerCase();
+    renderLists();
+    updateCounts();
+    
+    // Показываем/скрываем кнопку очистки
+    if (clearBtn) {
+      clearBtn.classList.toggle('is-visible', searchInput.value.length > 0);
+    }
+  };
+
+  searchInput.addEventListener('input', () => {
     clearTimeout(debounceTimer);
-    debounceTimer = setTimeout(() => {
-      searchQuery = e.target.value.trim().toLowerCase();
+    debounceTimer = setTimeout(updateSearch, 200);
+  });
+
+  // Очистка поиска
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      searchQuery = '';
+      clearBtn.classList.remove('is-visible');
       renderLists();
       updateCounts();
-    }, 200); // debounce 200ms
-  });
+      searchInput.focus();
+    });
+  }
 }
 
 // Модалка подтверждения
@@ -684,7 +705,7 @@ function createTaskElement(task, listId) {
     taskContent.appendChild(taskLink);
   }
   
-  // Блок описания (если есть)
+  // Блок описания
   if (task.description) {
     const descBlock = document.createElement('div');
     descBlock.className = 'description-block';
@@ -715,12 +736,82 @@ function createTaskElement(task, listId) {
     descBlock.appendChild(descToggle);
     descBlock.appendChild(descContent);
     taskContent.appendChild(descBlock);
+  } else {
+    // Кнопка "добавить описание"
+    const addDescBtn = document.createElement('button');
+    addDescBtn.className = 'add-desc-btn';
+    addDescBtn.type = 'button';
+    addDescBtn.textContent = '+ добавить описание';
+    addDescBtn.addEventListener('click', () => {
+      showAddDescriptionInput(task, taskContent, addDescBtn);
+    });
+    taskContent.appendChild(addDescBtn);
   }
   
   taskDiv.appendChild(taskLeft);
   taskDiv.appendChild(taskContent);
   
   return taskDiv;
+}
+
+// Показать инпут для добавления описания
+function showAddDescriptionInput(task, taskContent, addDescBtn) {
+  addDescBtn.style.display = 'none';
+
+  const inputWrapper = document.createElement('div');
+  inputWrapper.className = 'add-desc-wrapper';
+
+  const textarea = document.createElement('textarea');
+  textarea.className = 'add-desc-input';
+  textarea.placeholder = 'Введите описание...';
+  textarea.rows = 2;
+
+  const btnGroup = document.createElement('div');
+  btnGroup.className = 'add-desc-buttons';
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'add-desc-save';
+  saveBtn.type = 'button';
+  saveBtn.textContent = 'Сохранить';
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'add-desc-cancel';
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Отмена';
+
+  btnGroup.appendChild(cancelBtn);
+  btnGroup.appendChild(saveBtn);
+  inputWrapper.appendChild(textarea);
+  inputWrapper.appendChild(btnGroup);
+  taskContent.appendChild(inputWrapper);
+
+  textarea.focus();
+
+  const save = () => {
+    const value = textarea.value.trim();
+    if (value) {
+      task.description = value;
+      renderLists();
+      updateCounts();
+    } else {
+      cancel();
+    }
+  };
+
+  const cancel = () => {
+    inputWrapper.remove();
+    addDescBtn.style.display = '';
+  };
+
+  saveBtn.addEventListener('click', save);
+  cancelBtn.addEventListener('click', cancel);
+
+  textarea.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      cancel();
+    }
+  });
 }
 
 // Получение цвета категории
