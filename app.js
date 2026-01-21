@@ -408,8 +408,10 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
     // Сворачиваем ВСЕ списки
     document.querySelectorAll('.list-card.is-expanded').forEach(openCard => {
       openCard.classList.remove('is-expanded');
-      openCard.querySelector('.tasks').style.display = 'none';
-      openCard.querySelector('.list-toggle').setAttribute('aria-expanded', 'false');
+      const tasks = openCard.querySelector('.tasks');
+      const btn = openCard.querySelector('.toggle-btn');
+      if (tasks) tasks.style.display = 'none';
+      if (btn) btn.setAttribute('aria-expanded', 'false');
     });
     expandedLists.clear();
     
