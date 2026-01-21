@@ -336,6 +336,23 @@ body {
   color: var(--text-light);
 }
 
+.list-edit-btn {
+  background: none;
+  border: none;
+  font-size: 14px;
+  color: var(--text-light);
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  opacity: 0.5;
+  transition: all 0.2s ease;
+}
+
+.list-edit-btn:hover {
+  opacity: 1;
+  background: rgba(0, 0, 0, 0.05);
+}
+
 .task-header__right {
   display: flex;
   align-items: center;
@@ -897,9 +914,17 @@ body {
   border-radius: 20px;
   padding: 28px;
   max-width: 400px;
-  width: 100%;
+  width: calc(100% - 32px);
+  margin: 16px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
   animation: slideUp 0.2s ease;
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+}
+
+.modal--date .modal__date-input {
+  -webkit-appearance: none;
+  appearance: none;
 }
 
 @keyframes slideUp {
@@ -1022,6 +1047,11 @@ body {
 
 .date-quick-btn:active {
   transform: scale(0.98);
+}
+
+.date-quick-btn.is-active {
+  background: var(--accent-blue);
+  color: white;
 }
 
 .modal__date-input {

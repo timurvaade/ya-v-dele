@@ -133,7 +133,7 @@ function showDatePickerModal(task) {
   overlay.className = 'modal-overlay';
 
   const modal = document.createElement('div');
-  modal.className = 'modal';
+  modal.className = 'modal modal--date';
 
   const modalTitle = document.createElement('h3');
   modalTitle.className = 'modal__title';
@@ -143,11 +143,27 @@ function showDatePickerModal(task) {
   const quickButtons = document.createElement('div');
   quickButtons.className = 'date-quick-buttons';
 
-  const today = new Date();
+  // Используем локальную дату (часовой пояс пользователя)
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const tomorrow = new Date(today);
   tomorrow.setDate(tomorrow.getDate() + 1);
   const nextWeek = new Date(today);
   nextWeek.setDate(nextWeek.getDate() + 7);
+
+  // Функция форматирования даты в YYYY-MM-DD
+  const formatDateValue = (date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  // Input для выбора даты
+  const dateInput = document.createElement('input');
+  dateInput.type = 'date';
+  dateInput.className = 'modal__date-input';
+  dateInput.value = task.due_date || '';
 
   const quickOptions = [
     { label: 'Сегодня', date: today },
@@ -162,23 +178,19 @@ function showDatePickerModal(task) {
     btn.type = 'button';
     btn.textContent = opt.label;
     btn.addEventListener('click', () => {
+      // Убираем активный класс со всех кнопок
+      quickButtons.querySelectorAll('.date-quick-btn').forEach(b => b.classList.remove('is-active'));
+      btn.classList.add('is-active');
+      
+      // Заполняем input, но не закрываем модалку
       if (opt.date) {
-        task.due_date = opt.date.toISOString().split('T')[0];
+        dateInput.value = formatDateValue(opt.date);
       } else {
-        task.due_date = '';
+        dateInput.value = '';
       }
-      overlay.remove();
-      renderLists();
-      updateCounts();
     });
     quickButtons.appendChild(btn);
   });
-
-  // Input для выбора даты
-  const dateInput = document.createElement('input');
-  dateInput.type = 'date';
-  dateInput.className = 'modal__date-input';
-  dateInput.value = task.due_date || '';
 
   const modalActions = document.createElement('div');
   modalActions.className = 'modal__actions';
@@ -373,6 +385,103 @@ function showCreateListModal() {
   document.body.appendChild(overlay);
 
   setTimeout(() => input.focus(), 100);
+}
+
+// Модалка редактирования списка
+function showEditListModal(list) {
+  const existing = document.querySelector('.modal-overlay');
+  if (existing) existing.remove();
+
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+
+  const modalTitle = document.createElement('h3');
+  modalTitle.className = 'modal__title';
+  modalTitle.textContent = 'Редактировать список';
+
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'modal__input';
+  input.value = list.title;
+  input.placeholder = 'Название списка';
+
+  const modalActions = document.createElement('div');
+  modalActions.className = 'modal__actions';
+
+  const deleteBtn = document.createElement('button');
+  deleteBtn.className = 'modal__btn modal__btn--danger';
+  deleteBtn.type = 'button';
+  deleteBtn.textContent = 'Удалить';
+  deleteBtn.addEventListener('click', () => {
+    overlay.remove();
+    showConfirmModal({
+      title: 'Удалить список?',
+      message: `Список "${list.title}" и все его задачи будут удалены.`,
+      confirmText: 'Удалить',
+      onConfirm: () => {
+        const index = window.APP_DATA.lists.findIndex(l => l.id === list.id);
+        if (index !== -1) {
+          window.APP_DATA.lists.splice(index, 1);
+          renderLists();
+          updateCounts();
+        }
+      }
+    });
+  });
+
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'modal__btn modal__btn--cancel';
+  cancelBtn.type = 'button';
+  cancelBtn.textContent = 'Отмена';
+  cancelBtn.addEventListener('click', () => overlay.remove());
+
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'modal__btn modal__btn--confirm';
+  saveBtn.type = 'button';
+  saveBtn.textContent = 'Сохранить';
+  saveBtn.addEventListener('click', () => {
+    const newTitle = input.value.trim();
+    if (newTitle) {
+      list.title = newTitle;
+      renderLists();
+    }
+    overlay.remove();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const newTitle = input.value.trim();
+      if (newTitle) {
+        list.title = newTitle;
+        renderLists();
+      }
+      overlay.remove();
+    }
+    if (e.key === 'Escape') overlay.remove();
+  });
+
+  modalActions.appendChild(deleteBtn);
+  modalActions.appendChild(cancelBtn);
+  modalActions.appendChild(saveBtn);
+
+  modal.appendChild(modalTitle);
+  modal.appendChild(input);
+  modal.appendChild(modalActions);
+  overlay.appendChild(modal);
+
+  document.body.appendChild(overlay);
+
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+
+  setTimeout(() => {
+    input.focus();
+    input.select();
+  }, 100);
 }
 
 // Pull-to-refresh
@@ -614,11 +723,23 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   title.className = 'list-title';
   title.textContent = list.title;
 
+  // Кнопка редактирования названия списка
+  const editListBtn = document.createElement('button');
+  editListBtn.className = 'list-edit-btn';
+  editListBtn.type = 'button';
+  editListBtn.innerHTML = '✎';
+  editListBtn.title = 'Переименовать';
+  editListBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showEditListModal(list);
+  });
+
   const countBadge = document.createElement('span');
   countBadge.className = 'list-count';
   countBadge.textContent = tasks.length;
 
   headLeft.appendChild(title);
+  headLeft.appendChild(editListBtn);
   headLeft.appendChild(countBadge);
   
   const toggleBtn = document.createElement('button');
