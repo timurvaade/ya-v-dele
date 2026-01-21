@@ -294,6 +294,19 @@ body {
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
 
+/* Пустой список (нет задач по фильтру) */
+.list-card.is-empty-list {
+  opacity: 0.5;
+  background: transparent;
+  box-shadow: none;
+  border: 1px dashed var(--line);
+}
+
+.list-card.is-empty-list:hover {
+  box-shadow: none;
+  opacity: 0.7;
+}
+
 .list-card__head {
   display: flex;
   justify-content: space-between;

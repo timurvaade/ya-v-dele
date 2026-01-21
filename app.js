@@ -297,27 +297,38 @@ function renderLists() {
     return;
   }
   
-  window.APP_DATA.lists.forEach(list => {
+  // Создаём массив списков с отфильтрованными задачами
+  const listsWithTasks = window.APP_DATA.lists.map(list => {
     const filteredTasks = filterTasks(list.items);
     
     // Проверяем, совпадает ли название списка с поиском
     const listTitleMatches = searchQuery && 
       list.title.toLowerCase().includes(searchQuery);
     
-    // Показываем список если:
-    // 1. Есть задачи после фильтрации, ИЛИ
-    // 2. Название списка совпадает с поиском (тогда показываем все задачи по статусу)
     let tasksToShow = filteredTasks;
     if (listTitleMatches && filteredTasks.length === 0) {
-      // Если название совпало, но задач нет — показываем задачи без поискового фильтра
       tasksToShow = filterTasksByStatus(list.items);
     }
     
-    if (tasksToShow.length === 0 && !listTitleMatches) return;
-    
-    // Автораскрытие при поиске
-    const autoExpand = !!searchQuery;
-    const listCard = createListCard(list, tasksToShow, autoExpand);
+    return {
+      list,
+      tasks: tasksToShow,
+      isEmpty: tasksToShow.length === 0
+    };
+  });
+  
+  // Сортируем: сначала с задачами, потом пустые
+  listsWithTasks.sort((a, b) => {
+    if (a.isEmpty && !b.isEmpty) return 1;
+    if (!a.isEmpty && b.isEmpty) return -1;
+    return 0;
+  });
+  
+  // Рендерим все списки
+  listsWithTasks.forEach(({ list, tasks, isEmpty }) => {
+    // Автораскрытие при поиске (только если есть задачи)
+    const autoExpand = !!searchQuery && !isEmpty;
+    const listCard = createListCard(list, tasks, autoExpand, isEmpty);
     container.appendChild(listCard);
   });
 }
@@ -331,14 +342,15 @@ function filterTasksByStatus(tasks) {
 }
 
 // Создание карточки списка
-function createListCard(list, tasks, autoExpand = false) {
+function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   // Проверяем, был ли список открыт ранее
   const wasExpanded = expandedLists.has(list.id);
-  const shouldExpand = autoExpand || wasExpanded;
+  const shouldExpand = (autoExpand || wasExpanded) && !isEmpty;
 
   const card = document.createElement('div');
   card.className = 'list-card';
   if (shouldExpand) card.classList.add('is-expanded');
+  if (isEmpty) card.classList.add('is-empty-list');
   card.dataset.listId = list.id;
   
   // Заголовок списка
@@ -962,6 +974,13 @@ function getCategoryColor(category) {
 function updateCounts() {
   if (!window.APP_DATA) return;
   
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  const weekEnd = new Date(today);
+  weekEnd.setDate(weekEnd.getDate() + 7);
+  
+  // Считаем задачи с учётом текущего фильтра по дате
   let totalAll = 0;
   let totalOpen = 0;
   let totalClosed = 0;
@@ -969,6 +988,42 @@ function updateCounts() {
   
   window.APP_DATA.lists.forEach(list => {
     list.items.forEach(task => {
+      // Проверяем фильтр по дате
+      let matchesDateFilter = true;
+      if (currentFilter === 'today') {
+        if (task.due_date) {
+          const dueDate = new Date(task.due_date);
+          dueDate.setHours(0, 0, 0, 0);
+          matchesDateFilter = dueDate.getTime() === today.getTime();
+        } else {
+          matchesDateFilter = false;
+        }
+      } else if (currentFilter === 'week') {
+        if (task.due_date) {
+          const dueDate = new Date(task.due_date);
+          dueDate.setHours(0, 0, 0, 0);
+          matchesDateFilter = dueDate >= today && dueDate <= weekEnd;
+        } else {
+          matchesDateFilter = false;
+        }
+      }
+      
+      if (!matchesDateFilter) return;
+      
+      // Проверяем поиск
+      if (searchQuery) {
+        const title = (task.title || '').toLowerCase();
+        const description = (task.description || '').toLowerCase();
+        const category = (task.category || '').toLowerCase();
+        const assignee = (task.assignee || '').toLowerCase();
+        
+        const matchesSearch = title.includes(searchQuery) ||
+                        description.includes(searchQuery) ||
+                        category.includes(searchQuery) ||
+                        assignee.includes(searchQuery);
+        if (!matchesSearch) return;
+      }
+      
       totalAll++;
       if (task.status === 'closed') totalClosed++;
       else if (task.status === 'risk') totalRisk++;
