@@ -1395,9 +1395,10 @@ function deleteTaskById(taskId, listId) {
   const list = window.APP_DATA.lists.find(l => String(l.id) === String(listId));
   if (!list) return;
   
-  const taskIndex = list.tasks.findIndex(t => String(t.id) === String(taskId));
+  // ВАЖНО: данные хранятся в list.items, не list.tasks!
+  const taskIndex = list.items.findIndex(t => String(t.id) === String(taskId));
   if (taskIndex !== -1) {
-    list.tasks.splice(taskIndex, 1);
+    list.items.splice(taskIndex, 1);
     renderLists();
     updateCounts();
   }
