@@ -499,22 +499,91 @@ body {
 .task {
   display: flex;
   gap: 12px;
-  padding: 12px 0;
+  padding: 12px;
+  position: relative;
+}
+
+/* Swipe wrapper */
+.task-swipe-wrapper {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  margin: 0 -12px;
   border-top: 1px solid var(--line);
   
   /* Анимация появления задач */
   animation: taskAppear 0.3s ease-out both;
 }
 
+.task-swipe-wrapper:first-child {
+  border-top: none;
+}
+
+.task-swipe-bg {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  font-size: 20px;
+  color: white;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+
+.task-swipe-bg--left {
+  right: 0;
+  background: var(--accent-red);
+  justify-content: flex-end;
+}
+
+.task-swipe-bg--right {
+  left: 0;
+  background: var(--accent-green);
+  justify-content: flex-start;
+}
+
+.task-swipe-wrapper.is-swiping .task-swipe-bg {
+  opacity: 1;
+}
+
+.task-swipe-content {
+  position: relative;
+  background: var(--card-inner);
+  transition: transform 0.15s ease-out;
+  z-index: 1;
+}
+
+.task-swipe-wrapper.is-swiping .task-swipe-content {
+  transition: none;
+}
+
+/* Анимация удаления */
+@keyframes taskSlideOut {
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+    height: 0;
+    padding: 0;
+    margin: 0;
+  }
+}
+
+.task-swipe-wrapper.is-removing {
+  animation: taskSlideOut 0.3s ease-out forwards;
+}
+
 /* Staggered появление задач */
-.task:nth-child(1) { animation-delay: 0ms; }
-.task:nth-child(2) { animation-delay: 30ms; }
-.task:nth-child(3) { animation-delay: 60ms; }
-.task:nth-child(4) { animation-delay: 90ms; }
-.task:nth-child(5) { animation-delay: 120ms; }
-.task:nth-child(6) { animation-delay: 150ms; }
-.task:nth-child(7) { animation-delay: 180ms; }
-.task:nth-child(8) { animation-delay: 210ms; }
+.task-swipe-wrapper:nth-child(1) { animation-delay: 0ms; }
+.task-swipe-wrapper:nth-child(2) { animation-delay: 30ms; }
+.task-swipe-wrapper:nth-child(3) { animation-delay: 60ms; }
+.task-swipe-wrapper:nth-child(4) { animation-delay: 90ms; }
+.task-swipe-wrapper:nth-child(5) { animation-delay: 120ms; }
+.task-swipe-wrapper:nth-child(6) { animation-delay: 150ms; }
+.task-swipe-wrapper:nth-child(7) { animation-delay: 180ms; }
+.task-swipe-wrapper:nth-child(8) { animation-delay: 210ms; }
 
 @keyframes taskAppear {
   from {
@@ -527,9 +596,6 @@ body {
   }
 }
 
-.task:first-child {
-  border-top: none;
-}
 
 .task__left {
   flex-shrink: 0;

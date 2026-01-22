@@ -1270,7 +1270,107 @@ function createTaskElement(task, listId) {
   taskDiv.appendChild(taskLeft);
   taskDiv.appendChild(taskContent);
   
-  return taskDiv;
+  // Оборачиваем в swipe wrapper
+  const swipeWrapper = document.createElement('div');
+  swipeWrapper.className = 'task-swipe-wrapper';
+  
+  // Фон для свайпа влево (удалить)
+  const bgLeft = document.createElement('div');
+  bgLeft.className = 'task-swipe-bg task-swipe-bg--left';
+  bgLeft.innerHTML = '🗑️';
+  
+  // Фон для свайпа вправо (выполнено)
+  const bgRight = document.createElement('div');
+  bgRight.className = 'task-swipe-bg task-swipe-bg--right';
+  bgRight.innerHTML = '✓';
+  
+  // Контент (сама задача)
+  const swipeContent = document.createElement('div');
+  swipeContent.className = 'task-swipe-content';
+  swipeContent.appendChild(taskDiv);
+  
+  swipeWrapper.appendChild(bgLeft);
+  swipeWrapper.appendChild(bgRight);
+  swipeWrapper.appendChild(swipeContent);
+  
+  // Добавляем swipe поведение
+  addSwipeBehavior(swipeWrapper, swipeContent, task, listId, checkbox);
+  
+  return swipeWrapper;
+}
+
+// Swipe gesture для задач
+function addSwipeBehavior(wrapper, content, task, listId, checkbox) {
+  let startX = 0;
+  let currentX = 0;
+  let isSwiping = false;
+  const threshold = 80; // Минимальный свайп для действия
+  
+  const onTouchStart = (e) => {
+    startX = e.touches[0].clientX;
+    isSwiping = true;
+    wrapper.classList.add('is-swiping');
+  };
+  
+  const onTouchMove = (e) => {
+    if (!isSwiping) return;
+    
+    currentX = e.touches[0].clientX;
+    const diff = currentX - startX;
+    
+    // Ограничиваем свайп
+    const maxSwipe = 120;
+    const limitedDiff = Math.max(-maxSwipe, Math.min(maxSwipe, diff));
+    
+    content.style.transform = `translateX(${limitedDiff}px)`;
+  };
+  
+  const onTouchEnd = () => {
+    if (!isSwiping) return;
+    isSwiping = false;
+    
+    const diff = currentX - startX;
+    wrapper.classList.remove('is-swiping');
+    content.style.transform = '';
+    
+    // Свайп влево — удалить
+    if (diff < -threshold) {
+      wrapper.classList.add('is-removing');
+      setTimeout(() => {
+        deleteTaskById(task.id, listId);
+      }, 300);
+    }
+    // Свайп вправо — отметить выполненным
+    else if (diff > threshold) {
+      task.status = task.status === 'closed' ? 'open' : 'closed';
+      checkbox.checked = task.status === 'closed';
+      const taskEl = wrapper.querySelector('.task');
+      taskEl.classList.toggle('is-completed', task.status === 'closed');
+      taskEl.classList.remove('is-risk');
+      updateCounts();
+    }
+    
+    startX = 0;
+    currentX = 0;
+  };
+  
+  wrapper.addEventListener('touchstart', onTouchStart, { passive: true });
+  wrapper.addEventListener('touchmove', onTouchMove, { passive: true });
+  wrapper.addEventListener('touchend', onTouchEnd);
+  wrapper.addEventListener('touchcancel', onTouchEnd);
+}
+
+// Удаление задачи по ID
+function deleteTaskById(taskId, listId) {
+  const list = window.APP_DATA.lists.find(l => l.id === listId);
+  if (!list) return;
+  
+  const taskIndex = list.tasks.findIndex(t => t.id === taskId);
+  if (taskIndex !== -1) {
+    list.tasks.splice(taskIndex, 1);
+    renderLists();
+    updateCounts();
+  }
 }
 
 // Показать инпут для добавления описания
