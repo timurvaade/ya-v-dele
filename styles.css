@@ -451,11 +451,6 @@ body {
   transition: transform 0.3s ease;
 }
 
-/* Приоткрыто — стрелка слегка повёрнута (указывает вниз-вправо) */
-.list-card.is-peeked .toggle-btn {
-  transform: rotate(-45deg);
-}
-
 /* Полностью открыто — стрелка на 180° */
 .list-card.is-expanded .toggle-btn {
   transform: rotate(180deg);
