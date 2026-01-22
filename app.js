@@ -1362,10 +1362,11 @@ function addSwipeBehavior(wrapper, content, task, listId, checkbox) {
 
 // Удаление задачи по ID
 function deleteTaskById(taskId, listId) {
-  const list = window.APP_DATA.lists.find(l => l.id === listId);
+  // Приводим к строке для надёжного сравнения (числа vs строки)
+  const list = window.APP_DATA.lists.find(l => String(l.id) === String(listId));
   if (!list) return;
   
-  const taskIndex = list.tasks.findIndex(t => t.id === taskId);
+  const taskIndex = list.tasks.findIndex(t => String(t.id) === String(taskId));
   if (taskIndex !== -1) {
     list.tasks.splice(taskIndex, 1);
     renderLists();
