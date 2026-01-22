@@ -701,14 +701,21 @@ function filterTasksByStatus(tasks) {
 }
 
 // Создание карточки списка
+// Три состояния: collapsed (свернуто), peeked (приоткрыто), expanded (полностью открыто)
 function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   // Проверяем, был ли список открыт ранее
   const wasExpanded = expandedLists.has(list.id);
   const shouldExpand = (autoExpand || wasExpanded) && !isEmpty;
+  // По умолчанию — приоткрыто (если есть задачи)
+  const shouldPeek = tasks.length > 0 && !isEmpty && !shouldExpand;
 
   const card = document.createElement('div');
   card.className = 'list-card';
-  if (shouldExpand) card.classList.add('is-expanded');
+  if (shouldExpand) {
+    card.classList.add('is-expanded');
+  } else if (shouldPeek) {
+    card.classList.add('is-peeked');
+  }
   if (isEmpty) card.classList.add('is-empty-list');
   card.dataset.listId = list.id;
   
@@ -750,7 +757,27 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   head.appendChild(headLeft);
   head.appendChild(toggleBtn);
   
-  // Контейнер задач
+  // Превью первой задачи (для состояния "приоткрыто")
+  const previewContainer = document.createElement('div');
+  previewContainer.className = 'task-preview';
+  previewContainer.style.display = shouldPeek ? 'block' : 'none';
+  
+  if (tasks.length > 0) {
+    const firstTask = tasks[0];
+    const previewTitle = document.createElement('div');
+    previewTitle.className = 'task-preview__title';
+    previewTitle.textContent = firstTask.title;
+    previewContainer.appendChild(previewTitle);
+    
+    if (tasks.length > 1) {
+      const moreText = document.createElement('div');
+      moreText.className = 'task-preview__more';
+      moreText.textContent = `+ ещё ${tasks.length - 1}`;
+      previewContainer.appendChild(moreText);
+    }
+  }
+  
+  // Контейнер задач (полный список)
   const tasksContainer = document.createElement('div');
   tasksContainer.className = 'tasks';
   tasksContainer.style.display = shouldExpand ? 'flex' : 'none';
@@ -776,26 +803,29 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   head.addEventListener('click', () => {
     const isCurrentlyExpanded = card.classList.contains('is-expanded');
     
-    // Сворачиваем ВСЕ списки
+    // Сворачиваем ВСЕ полностью открытые списки → в приоткрытое состояние
     document.querySelectorAll('.list-card.is-expanded').forEach(openCard => {
       openCard.classList.remove('is-expanded');
-      const tasks = openCard.querySelector('.tasks');
-      const btn = openCard.querySelector('.toggle-btn');
-      if (tasks) tasks.style.display = 'none';
-      if (btn) btn.setAttribute('aria-expanded', 'false');
+      openCard.classList.add('is-peeked');
+      const tasksEl = openCard.querySelector('.tasks');
+      const previewEl = openCard.querySelector('.task-preview');
+      if (tasksEl) tasksEl.style.display = 'none';
+      if (previewEl) previewEl.style.display = 'block';
     });
     expandedLists.clear();
     
-    // Если текущий был закрыт — открываем его
+    // Если текущий был не полностью открыт — открываем полностью
     if (!isCurrentlyExpanded) {
+      card.classList.remove('is-peeked');
       card.classList.add('is-expanded');
+      previewContainer.style.display = 'none';
       tasksContainer.style.display = 'flex';
-      toggleBtn.setAttribute('aria-expanded', 'true');
       expandedLists.add(list.id);
     }
   });
   
   card.appendChild(head);
+  card.appendChild(previewContainer);
   card.appendChild(tasksContainer);
   
   return card;

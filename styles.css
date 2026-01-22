@@ -427,6 +427,12 @@ body {
   transition: transform 0.3s ease;
 }
 
+/* Приоткрыто — стрелка на 45° */
+.list-card.is-peeked .toggle-btn {
+  transform: rotate(45deg);
+}
+
+/* Полностью открыто — стрелка на 180° */
 .list-card.is-expanded .toggle-btn {
   transform: rotate(180deg);
 }
@@ -436,6 +442,29 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0;
+}
+
+/* Превью задачи в приоткрытом состоянии */
+.task-preview {
+  padding: 10px 0;
+  border-top: 1px solid var(--line);
+}
+
+.task-preview__title {
+  font-size: 14px;
+  color: var(--text-light);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.task-preview__more {
+  font-size: 12px;
+  color: var(--text-light);
+  margin-top: 4px;
+  opacity: 0.7;
 }
 
 .task {
