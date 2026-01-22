@@ -730,23 +730,11 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   title.className = 'list-title';
   title.textContent = list.title;
 
-  // Кнопка редактирования названия списка
-  const editListBtn = document.createElement('button');
-  editListBtn.className = 'list-edit-btn';
-  editListBtn.type = 'button';
-  editListBtn.innerHTML = '✎';
-  editListBtn.title = 'Переименовать';
-  editListBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    showEditListModal(list);
-  });
-
   const countBadge = document.createElement('span');
   countBadge.className = 'list-count';
   countBadge.textContent = tasks.length;
 
   headLeft.appendChild(title);
-  headLeft.appendChild(editListBtn);
   headLeft.appendChild(countBadge);
   
   const toggleBtn = document.createElement('button');
@@ -798,9 +786,47 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   });
   tasksContainer.appendChild(addTaskBtn);
   
-  // Обработчик раскрытия/скрытия — клик на весь заголовок (аккордеон)
-  head.style.cursor = 'pointer';
-  head.addEventListener('click', () => {
+  // Long press для редактирования списка
+  let longPressTimer = null;
+  let isLongPress = false;
+  
+  const startLongPress = (e) => {
+    isLongPress = false;
+    longPressTimer = setTimeout(() => {
+      isLongPress = true;
+      showEditListModal(list);
+    }, 500); // 500ms для long press
+  };
+  
+  const cancelLongPress = () => {
+    if (longPressTimer) {
+      clearTimeout(longPressTimer);
+      longPressTimer = null;
+    }
+  };
+  
+  // Обработчик раскрытия/скрытия — клик на весь блок (аккордеон)
+  card.style.cursor = 'pointer';
+  
+  card.addEventListener('mousedown', startLongPress);
+  card.addEventListener('mouseup', cancelLongPress);
+  card.addEventListener('mouseleave', cancelLongPress);
+  card.addEventListener('touchstart', startLongPress);
+  card.addEventListener('touchend', cancelLongPress);
+  card.addEventListener('touchmove', cancelLongPress);
+  
+  card.addEventListener('click', (e) => {
+    // Игнорируем клики по интерактивным элементам внутри
+    if (e.target.closest('.task, .add-task-btn, .add-task-wrapper, button')) {
+      return;
+    }
+    
+    // Игнорируем если это был long press
+    if (isLongPress) {
+      isLongPress = false;
+      return;
+    }
+    
     const isCurrentlyExpanded = card.classList.contains('is-expanded');
     
     // Сворачиваем ВСЕ полностью открытые списки → в приоткрытое состояние
