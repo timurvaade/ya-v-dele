@@ -691,6 +691,7 @@ body {
   box-sizing: border-box;
   transition: background 0.2s ease;
   position: relative;
+  overflow: hidden;
 }
 
 .description-block.has-overflow {
@@ -710,6 +711,8 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
   padding-right: 56px; /* место для иконки и стрелки */
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 .description-arrow {
@@ -956,6 +959,22 @@ body {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+/* Модалка редактирования списка — кнопки в колонку на мобильных */
+.modal__actions--list {
+  flex-direction: column-reverse;
+}
+
+.modal__actions--list .modal__btn {
+  width: 100%;
+  text-align: center;
+}
+
+.modal__actions--list .modal__btn--danger {
+  order: -1;
+  margin-top: 8px;
 }
 
 .modal__btn {

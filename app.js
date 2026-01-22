@@ -409,7 +409,7 @@ function showEditListModal(list) {
   input.placeholder = 'Название списка';
 
   const modalActions = document.createElement('div');
-  modalActions.className = 'modal__actions';
+  modalActions.className = 'modal__actions modal__actions--list';
 
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'modal__btn modal__btn--danger';
