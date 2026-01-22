@@ -1302,38 +1302,67 @@ function createTaskElement(task, listId) {
 // Swipe gesture для задач
 function addSwipeBehavior(wrapper, content, task, listId, checkbox) {
   let startX = 0;
+  let startY = 0;
   let currentX = 0;
   let isSwiping = false;
+  let isScrolling = false;
   const threshold = 80; // Минимальный свайп для действия
+  const minSwipeDistance = 10; // Минимум пикселей чтобы считать это свайпом
   
   const onTouchStart = (e) => {
+    // Не свайпаем если клик по интерактивному элементу
+    const target = e.target;
+    if (target.closest('button, input, a, .task-menu, .task-dropdown, .checkbox, .description-edit-icon')) {
+      return;
+    }
+    
     startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    currentX = startX;
     isSwiping = true;
-    wrapper.classList.add('is-swiping');
+    isScrolling = false;
   };
   
   const onTouchMove = (e) => {
     if (!isSwiping) return;
     
     currentX = e.touches[0].clientX;
-    const diff = currentX - startX;
+    const currentY = e.touches[0].clientY;
+    const diffX = currentX - startX;
+    const diffY = currentY - startY;
+    
+    // Определяем: это скролл (вертикальный) или свайп (горизонтальный)?
+    if (!isScrolling && Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 10) {
+      isScrolling = true;
+      isSwiping = false;
+      return;
+    }
+    
+    // Не двигаем пока не пройдём минимальное расстояние
+    if (Math.abs(diffX) < minSwipeDistance) return;
+    
+    wrapper.classList.add('is-swiping');
     
     // Ограничиваем свайп
     const maxSwipe = 120;
-    const limitedDiff = Math.max(-maxSwipe, Math.min(maxSwipe, diff));
+    const limitedDiff = Math.max(-maxSwipe, Math.min(maxSwipe, diffX));
     
     content.style.transform = `translateX(${limitedDiff}px)`;
   };
   
   const onTouchEnd = () => {
-    if (!isSwiping) return;
+    if (!isSwiping) {
+      startX = 0;
+      currentX = 0;
+      return;
+    }
     isSwiping = false;
     
     const diff = currentX - startX;
     wrapper.classList.remove('is-swiping');
     content.style.transform = '';
     
-    // Свайп влево — удалить
+    // Свайп влево — удалить (только если прошли threshold)
     if (diff < -threshold) {
       wrapper.classList.add('is-removing');
       setTimeout(() => {

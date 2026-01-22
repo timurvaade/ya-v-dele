@@ -748,6 +748,38 @@ body {
   margin-top: 4px;
 }
 
+/* На мобильных — action sheet снизу экрана */
+@media (max-width: 480px) {
+  .task-dropdown {
+    position: fixed;
+    top: auto;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    min-width: 100%;
+    border-radius: 20px 20px 0 0;
+    padding: 16px 0;
+    padding-bottom: calc(16px + env(safe-area-inset-bottom));
+    margin-top: 0;
+    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.15);
+    animation: slideUpSheet 0.2s ease-out;
+  }
+  
+  .task-dropdown__item {
+    padding: 14px 20px;
+    font-size: 16px;
+  }
+}
+
+@keyframes slideUpSheet {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
 .task-dropdown.is-open {
   display: block;
 }
