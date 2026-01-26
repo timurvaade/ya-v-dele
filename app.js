@@ -10,6 +10,9 @@ const API_URL = 'https://script.google.com/macros/s/AKfycbws_FqfDdYUoORdmJDy9-Uh
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async () => {
+  // Регистрируем Service Worker
+  registerServiceWorker();
+  
   initTabs();
   initFilters();
   initSearch();
@@ -29,6 +32,30 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 });
 
+// Регистрация Service Worker
+function registerServiceWorker() {
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js')
+      .then(registration => {
+        console.log('✅ Service Worker зарегистрирован:', registration.scope);
+        
+        // Проверяем обновления
+        registration.addEventListener('updatefound', () => {
+          const newWorker = registration.installing;
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Есть обновление — показываем уведомление
+              showToast('Доступно обновление! Перезагрузите страницу');
+            }
+          });
+        });
+      })
+      .catch(error => {
+        console.error('❌ Ошибка регистрации Service Worker:', error);
+      });
+  }
+}
+
 // Загрузка данных из Google Sheets API
 async function loadDataFromAPI() {
   try {
@@ -40,19 +67,37 @@ async function loadDataFromAPI() {
     
     if (data && data.lists) {
       window.APP_DATA = data;
+      // Сохраняем в localStorage как fallback для офлайна
+      localStorage.setItem('ya-v-dele-data', JSON.stringify(data));
       console.log('✅ Данные загружены из Google Sheets:', data);
+    } else if (data.offline) {
+      // Офлайн режим — загружаем из localStorage
+      loadFromLocalStorage();
+      showToast('📴 Офлайн режим');
     } else {
       console.error('❌ Неверный формат данных:', data);
     }
   } catch (error) {
     console.error('❌ Ошибка загрузки данных:', error);
-    // Если API недоступен, используем локальные данные (fallback)
-    if (!window.APP_DATA) {
-      console.log('⚠️ Используем локальные данные');
-    }
+    // Пробуем загрузить из localStorage
+    loadFromLocalStorage();
+    showToast('📴 Офлайн режим');
   } finally {
     isLoading = false;
     hideLoadingIndicator();
+  }
+}
+
+// Загрузка из localStorage (офлайн fallback)
+function loadFromLocalStorage() {
+  const cached = localStorage.getItem('ya-v-dele-data');
+  if (cached) {
+    try {
+      window.APP_DATA = JSON.parse(cached);
+      console.log('📦 Данные загружены из кэша');
+    } catch (e) {
+      console.error('❌ Ошибка парсинга кэша');
+    }
   }
 }
 
