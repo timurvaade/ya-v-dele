@@ -3,15 +3,23 @@ let currentFilter = 'all'; // all, today, week, later
 let currentStatusFilter = 'all'; // all, open, closed, risk
 let searchQuery = ''; // поисковый запрос
 let expandedLists = new Set(); // ID раскрытых списков
+let isLoading = false; // флаг загрузки
+
+// Google Sheets API URL
+const API_URL = 'https://script.google.com/macros/s/AKfycbws_FqfDdYUoORdmJDy9-UhqSXD-l0ahNIptB3s6bIpFw88n4cr_a-kEWPselcBgrGk/exec';
 
 // Инициализация при загрузке страницы
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   initTabs();
   initFilters();
   initSearch();
   initFAB();
   initCurrentDate();
   initPullToRefresh();
+  
+  // Загружаем данные из Google Sheets
+  await loadDataFromAPI();
+  
   renderLists();
   updateCounts();
 
@@ -20,6 +28,66 @@ document.addEventListener('DOMContentLoaded', () => {
     document.querySelectorAll('.task-dropdown.is-open').forEach(d => d.classList.remove('is-open'));
   });
 });
+
+// Загрузка данных из Google Sheets API
+async function loadDataFromAPI() {
+  try {
+    isLoading = true;
+    showLoadingIndicator();
+    
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    
+    if (data && data.lists) {
+      window.APP_DATA = data;
+      console.log('✅ Данные загружены из Google Sheets:', data);
+    } else {
+      console.error('❌ Неверный формат данных:', data);
+    }
+  } catch (error) {
+    console.error('❌ Ошибка загрузки данных:', error);
+    // Если API недоступен, используем локальные данные (fallback)
+    if (!window.APP_DATA) {
+      console.log('⚠️ Используем локальные данные');
+    }
+  } finally {
+    isLoading = false;
+    hideLoadingIndicator();
+  }
+}
+
+// Сохранение изменений в Google Sheets
+async function saveToAPI(action, data) {
+  try {
+    const response = await fetch(API_URL, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ action, ...data }),
+      mode: 'no-cors' // Apps Script требует no-cors для POST
+    });
+    console.log(`✅ ${action} выполнено`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Ошибка ${action}:`, error);
+    return false;
+  }
+}
+
+// Показать индикатор загрузки
+function showLoadingIndicator() {
+  const container = document.getElementById('lists-container');
+  if (container && !document.querySelector('.loading-indicator')) {
+    container.innerHTML = '<div class="loading-indicator">Загрузка...</div>';
+  }
+}
+
+// Скрыть индикатор загрузки
+function hideLoadingIndicator() {
+  const indicator = document.querySelector('.loading-indicator');
+  if (indicator) indicator.remove();
+}
 
 // Инициализация поиска
 function initSearch() {
@@ -531,16 +599,16 @@ function initPullToRefresh() {
     const height = parseInt(indicator.style.height) || 0;
     
     if (height > 80) {
-      // Выполняем обновление
+      // Выполняем обновление — загружаем свежие данные из API
       indicator.classList.add('is-loading');
       indicator.querySelector('.pull-indicator__text').textContent = 'Обновление...';
       indicator.querySelector('.pull-indicator__icon').textContent = '⟳';
       
-      setTimeout(() => {
+      loadDataFromAPI().then(() => {
         renderLists();
         updateCounts();
         resetIndicator();
-      }, 800);
+      });
     } else {
       resetIndicator();
     }
@@ -1392,7 +1460,8 @@ function addSwipeBehavior(wrapper, content, task, listId, checkbox) {
 // Удаление задачи по ID
 function deleteTaskById(taskId, listId) {
   // Приводим к строке для надёжного сравнения (числа vs строки)
-  const list = window.APP_DATA.lists.find(l => String(l.id) === String(listId));
+  const listIndex = window.APP_DATA.lists.findIndex(l => String(l.id) === String(listId));
+  const list = window.APP_DATA.lists[listIndex];
   if (!list) return;
   
   // ВАЖНО: данные хранятся в list.items, не list.tasks!
@@ -1401,6 +1470,9 @@ function deleteTaskById(taskId, listId) {
     list.items.splice(taskIndex, 1);
     renderLists();
     updateCounts();
+    
+    // Синхронизация с Google Sheets
+    saveToAPI('delete', { listIndex, taskId: String(taskId) });
   }
 }
 

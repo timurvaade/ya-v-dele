@@ -1271,6 +1271,14 @@ body {
   border-color: var(--accent-blue);
 }
 
+/* Loading Indicator */
+.loading-indicator {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--text-light);
+  font-size: 16px;
+}
+
 /* Pull to Refresh */
 .pull-indicator {
   height: 0;
