@@ -76,6 +76,15 @@ async function loadDataFromAPI() {
       // Сохраняем в localStorage как fallback для офлайна
       localStorage.setItem('ya-v-dele-data', JSON.stringify(data));
       console.log('✅ Данные загружены из Google Sheets:', data);
+      
+      // Логируем категории для отладки
+      data.lists.forEach(list => {
+        list.items?.forEach(item => {
+          if (item.category || item.tags) {
+            console.log(`📋 Задача "${item.title}": category="${item.category}", tags="${item.tags}"`);
+          }
+        });
+      });
     } else if (data.offline) {
       // Офлайн режим — загружаем из localStorage
       loadFromLocalStorage();
@@ -1392,10 +1401,15 @@ function createTaskElement(task, listId) {
   const taskHeader = document.createElement('div');
   taskHeader.className = 'task-header';
   
-  if (task.category) {
+  // Поддержка category и tags (может быть строка или массив)
+  const category = task.category || task.tags || '';
+  const categoryValue = Array.isArray(category) ? category[0] : category;
+  
+  if (categoryValue && categoryValue.trim()) {
     const pill = document.createElement('span');
-    pill.className = `pill pill--${getCategoryColor(task.category)}`;
-    pill.textContent = task.category;
+    const color = getCategoryColor(categoryValue);
+    pill.className = `pill pill--${color}`;
+    pill.textContent = categoryValue;
     taskHeader.appendChild(pill);
   }
   
@@ -1857,6 +1871,8 @@ function showEditDescriptionInput(task, descBlock, descText, listId) {
 
 // Получение цвета категории
 function getCategoryColor(category) {
+  if (!category) return 'blue';
+  
   // Предопределённые цвета для известных категорий
   const colors = {
     // Производственные этапы
@@ -1880,7 +1896,7 @@ function getCategoryColor(category) {
   };
   
   // Ищем с учётом регистра
-  const normalizedCategory = category.toLowerCase().trim();
+  const normalizedCategory = String(category).toLowerCase().trim();
   for (const [key, value] of Object.entries(colors)) {
     if (key.toLowerCase() === normalizedCategory) {
       return value;
@@ -1889,7 +1905,7 @@ function getCategoryColor(category) {
   
   // Авто-цвет на основе хэша (для новых категорий)
   const availableColors = ['blue', 'green', 'red', 'cyan', 'violet', 'brown', 'teal'];
-  const hash = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  const hash = String(category).split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   return availableColors[hash % availableColors.length];
 }
 
