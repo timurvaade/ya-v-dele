@@ -1184,6 +1184,11 @@ function createTaskElement(task, listId) {
   checkbox.id = `task-${task.id}`;
   checkbox.checked = task.status === 'closed';
   
+  // Останавливаем всплытие событий чтобы swipe не перехватывал
+  checkbox.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+  checkbox.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
+  checkbox.addEventListener('click', (e) => e.stopPropagation());
+  
   checkbox.addEventListener('change', () => {
     task.status = checkbox.checked ? 'closed' : 'open';
     taskDiv.classList.toggle('is-completed', task.status === 'closed');
@@ -1297,6 +1302,10 @@ function createTaskElement(task, listId) {
   dropdown.appendChild(riskBtn);
   dropdown.appendChild(deleteBtn);
 
+  // Останавливаем всплытие touch событий
+  taskMenuBtn.addEventListener('touchstart', (e) => e.stopPropagation(), { passive: true });
+  taskMenuBtn.addEventListener('touchend', (e) => e.stopPropagation(), { passive: true });
+  
   taskMenuBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     // Закрываем все другие открытые меню
