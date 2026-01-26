@@ -75,6 +75,35 @@ async function saveToAPI(action, data) {
   }
 }
 
+// Обновить задачу в API
+function syncTaskUpdate(task, listId) {
+  const listIndex = window.APP_DATA.lists.findIndex(l => String(l.id) === String(listId));
+  if (listIndex === -1) return;
+  
+  saveToAPI('update', { 
+    listIndex, 
+    task: {
+      id: task.id,
+      title: task.title,
+      category: task.category,
+      status: task.status,
+      description: task.description,
+      link: task.link,
+      assignee: task.assignee,
+      due_date: task.due_date,
+      created_at: task.created_at
+    }
+  });
+}
+
+// Создать задачу в API
+function syncTaskCreate(task, listId) {
+  const listIndex = window.APP_DATA.lists.findIndex(l => String(l.id) === String(listId));
+  if (listIndex === -1) return;
+  
+  saveToAPI('create', { listIndex, task });
+}
+
 // Показать индикатор загрузки
 function showLoadingIndicator() {
   const container = document.getElementById('lists-container');
@@ -193,7 +222,7 @@ function showConfirmModal({ title, message, confirmText = 'Подтвердит�
 }
 
 // Модалка выбора даты
-function showDatePickerModal(task) {
+function showDatePickerModal(task, listId) {
   const existing = document.querySelector('.modal-overlay');
   if (existing) existing.remove();
 
@@ -278,6 +307,7 @@ function showDatePickerModal(task) {
     overlay.remove();
     renderLists();
     updateCounts();
+    syncTaskUpdate(task, listId); // Синхронизация с Google Sheets
   });
 
   modalActions.appendChild(cancelBtn);
@@ -980,6 +1010,9 @@ function showAddTaskInput(list, tasksContainer, addTaskBtn) {
       // Перерисовываем
       renderLists();
       updateCounts();
+      
+      // Синхронизация с Google Sheets
+      syncTaskCreate(newTask, list.id);
     } else {
       cancelInput();
     }
@@ -1059,7 +1092,7 @@ function createAssignees(assigneeStr) {
 }
 
 // Инлайн-редактирование названия задачи
-function startInlineEdit(titleLabel, task) {
+function startInlineEdit(titleLabel, task, listId) {
   const originalText = task.title;
   
   // Создаём input
@@ -1079,6 +1112,7 @@ function startInlineEdit(titleLabel, task) {
     if (newValue && newValue !== originalText) {
       task.title = newValue;
       titleLabel.textContent = newValue;
+      syncTaskUpdate(task, listId); // Синхронизация с Google Sheets
     }
     finishEdit();
   };
@@ -1129,6 +1163,7 @@ function createTaskElement(task, listId) {
     taskDiv.classList.toggle('is-completed', task.status === 'closed');
     taskDiv.classList.remove('is-risk');
     updateCounts();
+    syncTaskUpdate(task, listId); // Синхронизация с Google Sheets
   });
   
   taskLeft.appendChild(checkbox);
@@ -1179,7 +1214,7 @@ function createTaskElement(task, listId) {
     const titleLabel = taskContent.querySelector('.task-title');
     if (!titleLabel) return;
     
-    startInlineEdit(titleLabel, task);
+    startInlineEdit(titleLabel, task, listId);
   });
 
   // Пункт: Дата
@@ -1190,7 +1225,7 @@ function createTaskElement(task, listId) {
   dateBtn.innerHTML = `📅 Дата: ${currentDate}`;
   dateBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
-    showDatePickerModal(task);
+    showDatePickerModal(task, listId);
   });
 
   // Пункт: В риске / Убрать из риска
@@ -1203,6 +1238,7 @@ function createTaskElement(task, listId) {
     task.status = task.status === 'risk' ? 'open' : 'risk';
     renderLists();
     updateCounts();
+    syncTaskUpdate(task, listId); // Синхронизация с Google Sheets
   });
 
   // Пункт: Удалить
@@ -1294,7 +1330,7 @@ function createTaskElement(task, listId) {
     editIcon.title = 'Редактировать';
     editIcon.addEventListener('click', (e) => {
       e.stopPropagation();
-      showEditDescriptionInput(task, descBlock, descText);
+      showEditDescriptionInput(task, descBlock, descText, listId);
     });
     descBlock.appendChild(editIcon);
 
@@ -1328,7 +1364,7 @@ function createTaskElement(task, listId) {
     addDescBtn.textContent = '+ добавить описание';
     addDescBtn.addEventListener('click', (e) => {
       e.stopPropagation();
-      showAddDescriptionInput(task, taskContent, descBlock);
+      showAddDescriptionInput(task, taskContent, descBlock, listId);
     });
     descBlock.appendChild(addDescBtn);
   }
@@ -1445,6 +1481,7 @@ function addSwipeBehavior(wrapper, content, task, listId, checkbox) {
       taskEl.classList.toggle('is-completed', task.status === 'closed');
       taskEl.classList.remove('is-risk');
       updateCounts();
+      syncTaskUpdate(task, listId); // Синхронизация с Google Sheets
     }
     
     startX = 0;
@@ -1477,7 +1514,7 @@ function deleteTaskById(taskId, listId) {
 }
 
 // Показать инпут для добавления описания
-function showAddDescriptionInput(task, taskContent, descBlock) {
+function showAddDescriptionInput(task, taskContent, descBlock, listId) {
   descBlock.style.display = 'none';
 
   const inputWrapper = document.createElement('div');
@@ -1515,6 +1552,7 @@ function showAddDescriptionInput(task, taskContent, descBlock) {
       task.description = value;
       renderLists();
       updateCounts();
+      syncTaskUpdate(task, listId); // Синхронизация с Google Sheets
     } else {
       cancel();
     }
@@ -1537,7 +1575,7 @@ function showAddDescriptionInput(task, taskContent, descBlock) {
 }
 
 // Показать инпут для редактирования описания
-function showEditDescriptionInput(task, descBlock, descText) {
+function showEditDescriptionInput(task, descBlock, descText, listId) {
   const originalText = task.description;
   
   // Скрываем блок описания
@@ -1578,6 +1616,7 @@ function showEditDescriptionInput(task, descBlock, descText) {
     task.description = value; // Сохраняем даже пустое (удаление описания)
     renderLists();
     updateCounts();
+    syncTaskUpdate(task, listId); // Синхронизация с Google Sheets
   };
 
   const cancel = () => {
