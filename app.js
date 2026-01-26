@@ -59,6 +59,8 @@ async function loadDataFromAPI() {
 // Сохранение изменений в Google Sheets
 async function saveToAPI(action, data) {
   try {
+    showToast('Сохранение...');
+    
     // Используем redirect: 'follow' для Apps Script
     const response = await fetch(API_URL, {
       method: 'POST',
@@ -72,11 +74,31 @@ async function saveToAPI(action, data) {
     // Пробуем прочитать ответ
     const result = await response.text();
     console.log(`✅ ${action}:`, result);
+    showToast('✓ Сохранено');
     return true;
   } catch (error) {
     console.error(`❌ Ошибка ${action}:`, error);
+    showToast('❌ Ошибка сохранения');
     return false;
   }
+}
+
+// Показать всплывающее уведомление
+function showToast(message) {
+  // Удаляем старый тост если есть
+  const oldToast = document.querySelector('.toast');
+  if (oldToast) oldToast.remove();
+  
+  const toast = document.createElement('div');
+  toast.className = 'toast';
+  toast.textContent = message;
+  document.body.appendChild(toast);
+  
+  // Убираем через 2 секунды
+  setTimeout(() => {
+    toast.classList.add('is-hiding');
+    setTimeout(() => toast.remove(), 300);
+  }, 2000);
 }
 
 // Обновить задачу в API
