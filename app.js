@@ -59,15 +59,19 @@ async function loadDataFromAPI() {
 // Сохранение изменений в Google Sheets
 async function saveToAPI(action, data) {
   try {
+    // Используем redirect: 'follow' для Apps Script
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'text/plain', // Apps Script лучше работает с text/plain
       },
       body: JSON.stringify({ action, ...data }),
-      mode: 'no-cors' // Apps Script требует no-cors для POST
+      redirect: 'follow'
     });
-    console.log(`✅ ${action} выполнено`);
+    
+    // Пробуем прочитать ответ
+    const result = await response.text();
+    console.log(`✅ ${action}:`, result);
     return true;
   } catch (error) {
     console.error(`❌ Ошибка ${action}:`, error);
