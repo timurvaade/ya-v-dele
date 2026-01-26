@@ -1857,10 +1857,18 @@ function showEditDescriptionInput(task, descBlock, descText, listId) {
 
 // Получение цвета категории
 function getCategoryColor(category) {
+  // Предопределённые цвета для известных категорий
   const colors = {
+    // Производственные этапы
+    'дизайн': 'violet',
+    'печать': 'cyan',
+    'постпродакшен': 'brown',
+    'подготовка': 'teal',
+    
+    // Общие категории
     'Питание': 'blue',
-    'Личное': 'blue',
-    'Финансы': 'green',
+    'Личное': 'green',
+    'Финансы': 'teal',
     'Семья': 'red',
     'Проект': 'cyan',
     'Операционка': 'violet',
@@ -1870,7 +1878,19 @@ function getCategoryColor(category) {
     'Встреча': 'teal',
     'Презентация': 'violet'
   };
-  return colors[category] || 'blue';
+  
+  // Ищем с учётом регистра
+  const normalizedCategory = category.toLowerCase().trim();
+  for (const [key, value] of Object.entries(colors)) {
+    if (key.toLowerCase() === normalizedCategory) {
+      return value;
+    }
+  }
+  
+  // Авто-цвет на основе хэша (для новых категорий)
+  const availableColors = ['blue', 'green', 'red', 'cyan', 'violet', 'brown', 'teal'];
+  const hash = category.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
+  return availableColors[hash % availableColors.length];
 }
 
 // Обновление счётчиков
