@@ -25,6 +25,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   renderLists();
   updateCounts();
+  
+  // Проверяем очередь синхронизации
+  updateSyncBadge();
+  if (navigator.onLine && getSyncQueue().length > 0) {
+    setTimeout(() => processSyncQueue(), 2000);
+  }
 
   // Закрытие dropdown при клике вне меню
   document.addEventListener('click', () => {
@@ -101,8 +107,19 @@ function loadFromLocalStorage() {
   }
 }
 
-// Сохранение изменений в Google Sheets
+// Сохранение изменений в Google Sheets (с очередью для офлайна)
 async function saveToAPI(action, data) {
+  // Сохраняем локально сразу
+  saveDataLocally();
+  
+  // Проверяем онлайн ли мы
+  if (!navigator.onLine) {
+    // Офлайн — добавляем в очередь
+    addToSyncQueue(action, data);
+    showToast('📴 Сохранено локально');
+    return false;
+  }
+  
   try {
     showToast('Сохранение...');
     
@@ -110,23 +127,146 @@ async function saveToAPI(action, data) {
     const response = await fetch(API_URL, {
       method: 'POST',
       headers: {
-        'Content-Type': 'text/plain', // Apps Script лучше работает с text/plain
+        'Content-Type': 'text/plain',
       },
       body: JSON.stringify({ action, ...data }),
       redirect: 'follow'
     });
     
-    // Пробуем прочитать ответ
     const result = await response.text();
     console.log(`✅ ${action}:`, result);
     showToast('✓ Сохранено');
     return true;
   } catch (error) {
     console.error(`❌ Ошибка ${action}:`, error);
-    showToast('❌ Ошибка сохранения');
+    // Сеть упала — добавляем в очередь
+    addToSyncQueue(action, data);
+    showToast('📴 Сохранено локально');
     return false;
   }
 }
+
+// Сохранить данные локально
+function saveDataLocally() {
+  if (window.APP_DATA) {
+    localStorage.setItem('ya-v-dele-data', JSON.stringify(window.APP_DATA));
+  }
+}
+
+// ========== ОЧЕРЕДЬ СИНХРОНИЗАЦИИ ==========
+
+// Добавить в очередь
+function addToSyncQueue(action, data) {
+  const queue = getSyncQueue();
+  queue.push({
+    id: Date.now(),
+    action,
+    data,
+    timestamp: new Date().toISOString()
+  });
+  localStorage.setItem('ya-v-dele-sync-queue', JSON.stringify(queue));
+  updateSyncBadge();
+  console.log('📝 Добавлено в очередь:', action);
+}
+
+// Получить очередь
+function getSyncQueue() {
+  try {
+    return JSON.parse(localStorage.getItem('ya-v-dele-sync-queue')) || [];
+  } catch {
+    return [];
+  }
+}
+
+// Очистить очередь
+function clearSyncQueue() {
+  localStorage.removeItem('ya-v-dele-sync-queue');
+  updateSyncBadge();
+}
+
+// Обновить индикатор очереди
+function updateSyncBadge() {
+  const queue = getSyncQueue();
+  let badge = document.querySelector('.sync-badge');
+  
+  if (queue.length === 0) {
+    if (badge) badge.remove();
+    return;
+  }
+  
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.className = 'sync-badge';
+    document.body.appendChild(badge);
+  }
+  
+  badge.textContent = `📴 ${queue.length} несинхр.`;
+  badge.onclick = () => processSyncQueue();
+}
+
+// Обработать очередь (отправить все накопленные изменения)
+async function processSyncQueue() {
+  const queue = getSyncQueue();
+  
+  if (queue.length === 0) {
+    showToast('Очередь пуста');
+    return;
+  }
+  
+  if (!navigator.onLine) {
+    showToast('Нет интернета');
+    return;
+  }
+  
+  showToast(`Синхронизация ${queue.length} изменений...`);
+  
+  let successCount = 0;
+  const failedItems = [];
+  
+  for (const item of queue) {
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain' },
+        body: JSON.stringify({ action: item.action, ...item.data }),
+        redirect: 'follow'
+      });
+      
+      if (response.ok) {
+        successCount++;
+      } else {
+        failedItems.push(item);
+      }
+    } catch {
+      failedItems.push(item);
+    }
+  }
+  
+  // Сохраняем только неудачные
+  localStorage.setItem('ya-v-dele-sync-queue', JSON.stringify(failedItems));
+  updateSyncBadge();
+  
+  if (failedItems.length === 0) {
+    showToast(`✓ Синхронизировано ${successCount} изменений`);
+  } else {
+    showToast(`⚠️ ${successCount} синхр., ${failedItems.length} ошибок`);
+  }
+}
+
+// Слушаем появление интернета
+window.addEventListener('online', () => {
+  console.log('🌐 Интернет появился');
+  const queue = getSyncQueue();
+  if (queue.length > 0) {
+    showToast('Интернет появился! Синхронизация...');
+    setTimeout(() => processSyncQueue(), 1000);
+  }
+});
+
+window.addEventListener('offline', () => {
+  console.log('📴 Интернет пропал');
+  showToast('📴 Офлайн режим');
+});
 
 // Показать всплывающее уведомление
 function showToast(message) {

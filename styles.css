@@ -1279,6 +1279,32 @@ body {
   font-size: 16px;
 }
 
+/* Sync Badge (индикатор несинхронизированных изменений) */
+.sync-badge {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  background: var(--accent-red);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2500;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  animation: pulse 2s infinite;
+}
+
+.sync-badge:hover {
+  transform: scale(1.05);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
 /* Toast уведомления */
 .toast {
   position: fixed;
