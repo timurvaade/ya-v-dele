@@ -124,7 +124,10 @@ async function loadDataFromAPI() {
         renderLists();
         updateCounts();
       }
-      showToast('📴 Офлайн режим');
+      // Показываем тост только если действительно офлайн
+      if (!navigator.onLine) {
+        showToast('📴 Офлайн режим');
+      }
     } else {
       console.error('❌ Неверный формат данных:', data);
     }
@@ -136,7 +139,10 @@ async function loadDataFromAPI() {
       renderLists();
       updateCounts();
     }
-    showToast('📴 Офлайн режим');
+    // Показываем тост только если действительно офлайн
+    if (!navigator.onLine) {
+      showToast('📴 Офлайн режим');
+    }
   } finally {
     isLoading = false;
     hideLoadingIndicator();
