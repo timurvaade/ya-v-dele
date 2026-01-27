@@ -215,6 +215,82 @@ document.addEventListener('DOMContentLoaded', async () => {
   console.log('💡 Для очистки Service Worker выполни в консоли: clearServiceWorker()');
 });
 
+// ========== ИКОНКИ SVG ==========
+
+// Кеш для загруженных SVG иконок
+const iconCache = new Map();
+
+// Загрузка SVG иконки (с кешированием)
+async function loadIconSVG(iconName) {
+  // Проверяем кеш
+  if (iconCache.has(iconName)) {
+    return iconCache.get(iconName);
+  }
+  
+  try {
+    const response = await fetch(`/icons/ui/${iconName}.svg`);
+    if (!response.ok) {
+      console.warn(`⚠️ Иконка не найдена: ${iconName}.svg`);
+      return null;
+    }
+    
+    let svgText = await response.text();
+    
+    // Заменяем жёстко заданные цвета на currentColor для возможности изменения через CSS
+    svgText = svgText.replace(/fill="#[^"]*"/g, 'fill="currentColor"');
+    svgText = svgText.replace(/stroke="#[^"]*"/g, 'stroke="currentColor"');
+    
+    // Кешируем
+    iconCache.set(iconName, svgText);
+    return svgText;
+  } catch (error) {
+    console.error(`❌ Ошибка загрузки иконки ${iconName}:`, error);
+    return null;
+  }
+}
+
+// Создание элемента с иконкой
+function createIcon(iconName, options = {}) {
+  const {
+    size = 24,
+    className = '',
+    title = ''
+  } = options;
+  
+  const iconWrapper = document.createElement('span');
+  iconWrapper.className = `icon icon--${iconName} ${className}`.trim();
+  iconWrapper.style.display = 'inline-flex';
+  iconWrapper.style.alignItems = 'center';
+  iconWrapper.style.justifyContent = 'center';
+  iconWrapper.style.width = `${size}px`;
+  iconWrapper.style.height = `${size}px`;
+  iconWrapper.style.color = 'currentColor';
+  
+  if (title) {
+    iconWrapper.title = title;
+  }
+  
+  // Загружаем SVG асинхронно
+  loadIconSVG(iconName).then(svgText => {
+    if (svgText) {
+      // Парсим SVG и устанавливаем размер
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      
+      if (svgElement) {
+        svgElement.setAttribute('width', size);
+        svgElement.setAttribute('height', size);
+        svgElement.style.display = 'block';
+        iconWrapper.innerHTML = '';
+        iconWrapper.appendChild(svgElement);
+      }
+    }
+  });
+  
+  return iconWrapper;
+}
+
 // Регистрация Service Worker
 function registerServiceWorker() {
   if ('serviceWorker' in navigator) {
@@ -644,6 +720,23 @@ function initSearch() {
   const searchInput = document.getElementById('search-input');
   const clearBtn = document.getElementById('search-clear');
   if (!searchInput) return;
+  
+  // Загружаем иконку для кнопки очистки
+  if (clearBtn) {
+    loadIconSVG('close').then(svgText => {
+      if (svgText) {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        if (svgElement) {
+          svgElement.setAttribute('width', '16');
+          svgElement.setAttribute('height', '16');
+          clearBtn.innerHTML = '';
+          clearBtn.appendChild(svgElement);
+        }
+      }
+    });
+  }
 
   let debounceTimer;
   
@@ -1053,6 +1146,35 @@ function initSidebar() {
     return;
   }
   
+  // Загружаем иконки для кнопок
+  loadIconSVG('menu').then(svgText => {
+    if (svgText && menuBtn) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '20');
+        svgElement.setAttribute('height', '20');
+        menuBtn.innerHTML = '';
+        menuBtn.appendChild(svgElement);
+      }
+    }
+  });
+  
+  loadIconSVG('close').then(svgText => {
+    if (svgText && sidebarClose) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '24');
+        svgElement.setAttribute('height', '24');
+        sidebarClose.innerHTML = '';
+        sidebarClose.appendChild(svgElement);
+      }
+    }
+  });
+  
   // Открытие боковой панели
   const openSidebar = (e) => {
     if (e) {
@@ -1161,10 +1283,33 @@ function createCategoryElement(category) {
   
   const categoryHeader = document.createElement('div');
   categoryHeader.className = 'sidebar-category__header';
-  categoryHeader.innerHTML = `
-    <span class="sidebar-category__name">${category.name}</span>
-    <button class="sidebar-category__toggle" data-category-id="${category.id}">▼</button>
-  `;
+  
+  const categoryName = document.createElement('span');
+  categoryName.className = 'sidebar-category__name';
+  categoryName.textContent = category.name;
+  
+  const toggleBtn = document.createElement('button');
+  toggleBtn.className = 'sidebar-category__toggle';
+  toggleBtn.setAttribute('data-category-id', category.id);
+  
+  // Загружаем иконку стрелки
+  const isExpanded = category.id === currentCategoryId;
+  loadIconSVG(isExpanded ? 'chevron-down' : 'chevron-right').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '12');
+        svgElement.setAttribute('height', '12');
+        toggleBtn.innerHTML = '';
+        toggleBtn.appendChild(svgElement);
+      }
+    }
+  });
+  
+  categoryHeader.appendChild(categoryName);
+  categoryHeader.appendChild(toggleBtn);
   
   const categoryLists = document.createElement('div');
   categoryLists.className = 'sidebar-category__lists';
@@ -1198,29 +1343,62 @@ function createCategoryElement(category) {
   // Переключение категории
   categoryHeader.addEventListener('click', () => {
     const isExpanded = categoryLists.classList.contains('is-expanded');
+    const toggleButton = categoryHeader.querySelector('.sidebar-category__toggle');
+    
     if (isExpanded) {
       categoryLists.classList.remove('is-expanded');
-      categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▶';
+      // Заменяем иконку на chevron-right
+      loadIconSVG('chevron-right').then(svgText => {
+        if (svgText && toggleButton) {
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgElement = svgDoc.querySelector('svg');
+          if (svgElement) {
+            svgElement.setAttribute('width', '12');
+            svgElement.setAttribute('height', '12');
+            toggleButton.innerHTML = '';
+            toggleButton.appendChild(svgElement);
+          }
+        }
+      });
     } else {
       // Закрываем все остальные категории
       document.querySelectorAll('.sidebar-category__lists').forEach(el => {
         el.classList.remove('is-expanded');
       });
       document.querySelectorAll('.sidebar-category__toggle').forEach(el => {
-        el.textContent = '▶';
+        loadIconSVG('chevron-right').then(svgText => {
+          if (svgText) {
+            const parser = new DOMParser();
+            const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+            const svgElement = svgDoc.querySelector('svg');
+            if (svgElement) {
+              svgElement.setAttribute('width', '12');
+              svgElement.setAttribute('height', '12');
+              el.innerHTML = '';
+              el.appendChild(svgElement);
+            }
+          }
+        });
       });
       
       categoryLists.classList.add('is-expanded');
-      categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▼';
+      // Заменяем иконку на chevron-down
+      loadIconSVG('chevron-down').then(svgText => {
+        if (svgText && toggleButton) {
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgElement = svgDoc.querySelector('svg');
+          if (svgElement) {
+            svgElement.setAttribute('width', '12');
+            svgElement.setAttribute('height', '12');
+            toggleButton.innerHTML = '';
+            toggleButton.appendChild(svgElement);
+          }
+        }
+      });
     }
   });
-  
-  // Устанавливаем правильную иконку
-  if (categoryLists.classList.contains('is-expanded')) {
-    categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▼';
-  } else {
-    categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▶';
-  }
   
   categoryDiv.appendChild(categoryHeader);
   categoryDiv.appendChild(categoryLists);
