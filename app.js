@@ -973,7 +973,8 @@ function saveConfig() {
 // Инициализация табов
 // Инициализация боковой панели
 function initSidebar() {
-  const menuBtn = document.getElementById('menu-btn');
+  // Поддерживаем и старую разметку (только класс .menu-btn), и новую (id="menu-btn")
+  const menuBtn = document.getElementById('menu-btn') || document.querySelector('.menu-btn');
   const sidebar = document.getElementById('sidebar');
   const sidebarOverlay = document.getElementById('sidebar-overlay');
   const sidebarClose = document.getElementById('sidebar-close');
