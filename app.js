@@ -22,13 +22,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   
   // Сначала загружаем из кеша и показываем сразу
   loadFromLocalStorage();
-  if (window.APP_DATA) {
-    renderLists();
-    updateCounts();
+  if (window.APP_DATA && window.APP_DATA.lists && window.APP_DATA.lists.length > 0) {
+    // Данные есть в кеше — показываем сразу
+    console.log('⚡ Загружено из кеша, показываем сразу');
+    hideLoadingIndicator(); // Убеждаемся, что индикатор скрыт
+  renderLists();
+  updateCounts();
+    // Обновляем в фоне (без показа индикатора)
+    refreshDataInBackground();
+  } else {
+    // Данных нет в кеше — загружаем с индикатором
+    console.log('📡 Данных нет в кеше, загружаем из API');
+    await loadDataFromAPI();
   }
-  
-  // Затем обновляем в фоне (без показа индикатора)
-  refreshDataInBackground();
   
   // Проверяем очередь синхронизации
   updateSyncBadge();
@@ -375,7 +381,11 @@ function syncTaskCreate(task, listId) {
 // Показать индикатор загрузки
 function showLoadingIndicator() {
   const container = document.getElementById('lists-container');
-  if (container && !document.querySelector('.loading-indicator')) {
+  if (container) {
+    // Убираем все существующие индикаторы
+    const existing = container.querySelector('.loading-indicator');
+    if (existing) existing.remove();
+    // Показываем новый индикатор
     container.innerHTML = '<div class="loading-indicator">Загрузка...</div>';
   }
 }
@@ -383,7 +393,14 @@ function showLoadingIndicator() {
 // Скрыть индикатор загрузки
 function hideLoadingIndicator() {
   const indicator = document.querySelector('.loading-indicator');
-  if (indicator) indicator.remove();
+  if (indicator) {
+    indicator.remove();
+  }
+  // Также очищаем контейнер, если там только индикатор
+  const container = document.getElementById('lists-container');
+  if (container && container.children.length === 0) {
+    container.innerHTML = '';
+  }
 }
 
 // Инициализация поиска
