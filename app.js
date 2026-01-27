@@ -1053,26 +1053,54 @@ function initSidebar() {
   }
   
   // Открытие боковой панели
-  menuBtn.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const openSidebar = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
     console.log('🖱️ Клик по меню');
     sidebar.classList.add('is-open');
     if (sidebarOverlay) {
       sidebarOverlay.classList.add('is-open');
     }
+    // Предотвращаем скролл body когда sidebar открыт
     document.body.style.overflow = 'hidden';
-  });
-  
-  // Закрытие боковой панели
-  const closeSidebar = () => {
-    sidebar?.classList.remove('is-open');
-    sidebarOverlay?.classList.remove('is-open');
-    document.body.style.overflow = '';
+    document.body.style.position = 'fixed';
+    document.body.style.width = '100%';
   };
   
+  // Закрытие боковой панели
+  const closeSidebar = (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+    sidebar?.classList.remove('is-open');
+    sidebarOverlay?.classList.remove('is-open');
+    // Восстанавливаем скролл body
+    document.body.style.overflow = '';
+    document.body.style.position = '';
+    document.body.style.width = '';
+  };
+  
+  // Обработчики для десктопа и мобильных
+  menuBtn.addEventListener('click', openSidebar);
+  menuBtn.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    openSidebar(e);
+  });
+  
   sidebarClose?.addEventListener('click', closeSidebar);
+  sidebarClose?.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    closeSidebar(e);
+  });
+  
   sidebarOverlay?.addEventListener('click', closeSidebar);
+  sidebarOverlay?.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    closeSidebar(e);
+  });
   
   // Рендерим содержимое боковой панели
   if (appConfig) {

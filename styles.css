@@ -359,7 +359,56 @@ body {
 
 @media (max-width: 480px) {
   .sidebar {
-    width: 260px;
+    width: 280px;
+    max-width: 85vw; /* Не больше 85% ширины экрана */
+    z-index: 10001; /* Выше чем на десктопе */
+    -webkit-overflow-scrolling: touch; /* Плавная прокрутка на iOS */
+  }
+  
+  .sidebar-overlay {
+    z-index: 10000; /* Соответствующий z-index для overlay */
+    -webkit-tap-highlight-color: transparent; /* Убираем подсветку при тапе на iOS */
+  }
+  
+  .sidebar__header {
+    padding: 16px;
+  }
+  
+  .sidebar__title {
+    font-size: 18px;
+  }
+  
+  .sidebar__close {
+    width: 36px;
+    height: 36px;
+    font-size: 28px;
+    /* Увеличиваем область клика для мобильных */
+    padding: 0;
+    margin: -8px;
+  }
+  
+  .sidebar__content {
+    padding: 8px;
+  }
+  
+  .sidebar__footer {
+    padding: 12px;
+  }
+  
+  .sidebar__add-btn {
+    padding: 14px;
+    font-size: 15px;
+  }
+  
+  .sidebar-category__header {
+    padding: 14px 12px;
+    /* Увеличиваем область клика */
+    min-height: 44px;
+  }
+  
+  .sidebar-list {
+    padding: 12px;
+    min-height: 44px; /* Минимальная высота для удобного тапа */
   }
 }
 
