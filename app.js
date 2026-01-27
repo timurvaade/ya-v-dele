@@ -1269,6 +1269,16 @@ async function selectList(categoryId, listId) {
 
 function initTabs() {
   const tabs = document.querySelectorAll('.tab');
+  
+  // Находим активную вкладку при загрузке и устанавливаем фильтр
+  const activeTab = document.querySelector('.tab.is-active');
+  if (activeTab && activeTab.dataset.filter) {
+    currentFilter = activeTab.dataset.filter;
+    // Обновляем заголовок и списки при загрузке
+    updateSectionTitle();
+    // renderLists() будет вызван позже в инициализации
+  }
+  
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
       // Убираем активный класс со всех табов
