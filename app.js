@@ -52,9 +52,19 @@ async function loadConfig() {
     
     // Если нет в localStorage, загружаем из config.json
     if (!appConfig) {
-      const response = await fetch('/config.json');
-      appConfig = await response.json();
-      console.log('✅ Конфигурация загружена из config.json');
+      try {
+        const response = await fetch('/config.json');
+        if (!response.ok) {
+          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        const text = await response.text();
+        console.log('📄 Ответ config.json:', text.substring(0, 100));
+        appConfig = JSON.parse(text);
+        console.log('✅ Конфигурация загружена из config.json');
+      } catch (fetchError) {
+        console.warn('⚠️ Не удалось загрузить config.json:', fetchError);
+        throw fetchError; // Пробрасываем дальше, чтобы сработал fallback
+      }
     }
     
     // Загружаем сохранённые значения из localStorage
@@ -118,7 +128,11 @@ document.addEventListener('DOMContentLoaded', async () => {
   // Загружаем конфигурацию
   await loadConfig();
   
-  initSidebar();
+  // Инициализируем sidebar после небольшой задержки, чтобы DOM точно загрузился
+  setTimeout(() => {
+    initSidebar();
+  }, 100);
+  
   initTabs();
   initFilters();
   initSearch();
@@ -964,15 +978,27 @@ function initSidebar() {
   const sidebarOverlay = document.getElementById('sidebar-overlay');
   const sidebarClose = document.getElementById('sidebar-close');
   
-  console.log('🔍 Инициализация sidebar:', { menuBtn, sidebar, sidebarOverlay, sidebarClose });
+  console.log('🔍 Инициализация sidebar:', { 
+    menuBtn: menuBtn ? 'найден' : 'НЕ НАЙДЕН', 
+    sidebar: sidebar ? 'найден' : 'НЕ НАЙДЕН', 
+    sidebarOverlay: sidebarOverlay ? 'найден' : 'НЕ НАЙДЕН',
+    sidebarClose: sidebarClose ? 'найден' : 'НЕ НАЙДЕН'
+  });
   
   if (!menuBtn) {
-    console.error('❌ Кнопка меню не найдена!');
+    console.error('❌ Кнопка меню не найдена! Проверь, что HTML обновился на сервере.');
+    console.log('🔍 Все элементы с id menu-btn:', document.querySelectorAll('[id*="menu"]'));
+    // Попробуем ещё раз через секунду
+    setTimeout(() => {
+      console.log('🔄 Повторная попытка инициализации sidebar...');
+      initSidebar();
+    }, 1000);
     return;
   }
   
   if (!sidebar) {
-    console.error('❌ Sidebar не найден!');
+    console.error('❌ Sidebar не найден! Проверь, что HTML обновился на сервере.');
+    console.log('🔍 Все элементы с id sidebar:', document.querySelectorAll('[id*="sidebar"]'));
     return;
   }
   
