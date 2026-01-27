@@ -1,5 +1,5 @@
 // Service Worker для "Я в деле"
-const CACHE_NAME = 'ya-v-dele-v1';
+const CACHE_NAME = 'ya-v-dele-v2'; // Обновляем версию для принудительного обновления
 
 // Файлы для кэширования
 const STATIC_ASSETS = [
@@ -56,7 +56,13 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   
-  // Для статики — Cache First
+  // Для app.js — Network First (чтобы всегда получать свежую версию)
+  if (url.pathname.includes('app.js')) {
+    event.respondWith(networkFirst(request));
+    return;
+  }
+  
+  // Для остальной статики — Cache First
   event.respondWith(cacheFirst(request));
 });
 
