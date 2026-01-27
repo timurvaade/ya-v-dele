@@ -1,5 +1,5 @@
 // Service Worker для "Я в деле"
-const CACHE_NAME = 'ya-v-dele-v2'; // Обновляем версию для принудительного обновления
+const CACHE_NAME = 'ya-v-dele-v3'; // Обновляем версию для принудительного обновления HTML
 
 // Файлы для кэширования
 const STATIC_ASSETS = [
