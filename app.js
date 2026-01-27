@@ -47,24 +47,43 @@ async function loadConfig() {
         console.log('✅ Конфигурация загружена из localStorage');
       } catch (e) {
         console.warn('⚠️ Ошибка парсинга сохранённой конфигурации');
+        appConfig = null;
       }
     }
     
-    // Если нет в localStorage, загружаем из config.json
+    // Если нет в localStorage, пробуем загрузить из config.json (но не критично)
     if (!appConfig) {
       try {
         const response = await fetch('/config.json');
-        if (!response.ok) {
-          throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        if (response.ok) {
+          const contentType = response.headers.get('content-type');
+          // Проверяем, что это действительно JSON, а не HTML
+          if (contentType && contentType.includes('application/json')) {
+            const text = await response.text();
+            // Проверяем, что это не HTML
+            if (!text.trim().startsWith('<!')) {
+              appConfig = JSON.parse(text);
+              console.log('✅ Конфигурация загружена из config.json');
+            } else {
+              console.warn('⚠️ config.json вернул HTML вместо JSON (файл не найден на сервере)');
+              throw new Error('config.json вернул HTML');
+            }
+          } else {
+            throw new Error('Неверный content-type');
+          }
+        } else {
+          throw new Error(`HTTP ${response.status}`);
         }
-        const text = await response.text();
-        console.log('📄 Ответ config.json:', text.substring(0, 100));
-        appConfig = JSON.parse(text);
-        console.log('✅ Конфигурация загружена из config.json');
       } catch (fetchError) {
-        console.warn('⚠️ Не удалось загрузить config.json:', fetchError);
-        throw fetchError; // Пробрасываем дальше, чтобы сработал fallback
+        console.warn('⚠️ Не удалось загрузить config.json, используем fallback:', fetchError.message);
+        // НЕ пробрасываем ошибку, используем fallback
+        appConfig = null; // Явно устанавливаем null, чтобы сработал fallback
       }
+    }
+    
+    // Если всё ещё нет конфигурации, используем fallback
+    if (!appConfig) {
+      throw new Error('Нет конфигурации, используем fallback');
     }
     
     // Загружаем сохранённые значения из localStorage
@@ -1000,6 +1019,16 @@ function initSidebar() {
   if (!sidebar) {
     console.error('❌ Sidebar не найден! Проверь, что HTML обновился на сервере.');
     console.log('🔍 Все элементы с id sidebar:', document.querySelectorAll('[id*="sidebar"]'));
+    console.log('🔍 Проверка HTML:', {
+      hasApp: !!document.querySelector('.app'),
+      hasScreen: !!document.querySelector('.screen'),
+      allIds: Array.from(document.querySelectorAll('[id]')).map(el => el.id).slice(0, 10)
+    });
+    // Попробуем ещё раз через секунду (может HTML ещё загружается)
+    setTimeout(() => {
+      console.log('🔄 Повторная попытка инициализации sidebar...');
+      initSidebar();
+    }, 1000);
     return;
   }
   
