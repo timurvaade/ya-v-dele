@@ -5,14 +5,120 @@ let searchQuery = ''; // поисковый запрос
 let expandedLists = new Set(); // ID раскрытых списков
 let isLoading = false; // флаг загрузки
 
-// Google Sheets API URL
-const API_URL = 'https://script.google.com/macros/s/AKfycbws_FqfDdYUoORdmJDy9-UhqSXD-l0ahNIptB3s6bIpFw88n4cr_a-kEWPselcBgrGk/exec';
+// Конфигурация приложения
+let appConfig = null;
+let currentCategoryId = null;
+let currentListId = null;
+
+// Google Sheets API URL (базовый, будет использоваться с параметрами)
+const API_BASE_URL = 'https://script.google.com/macros/s/AKfycbws_FqfDdYUoORdmJDy9-UhqSXD-l0ahNIptB3s6bIpFw88n4cr_a-kEWPselcBgrGk/exec';
+
+// Получить текущий API URL с параметрами
+function getCurrentAPIUrl() {
+  if (!currentListId || !appConfig) return API_BASE_URL;
+  
+  const category = appConfig.categories.find(c => c.id === currentCategoryId);
+  if (!category) return API_BASE_URL;
+  
+  const list = category.lists.find(l => l.id === currentListId);
+  if (!list) return API_BASE_URL;
+  
+  // Если у списка есть свой apiUrl, используем его, иначе базовый с параметрами
+  if (list.apiUrl) {
+    return list.apiUrl;
+  }
+  
+  // Добавляем spreadsheet_id как параметр
+  const url = new URL(API_BASE_URL);
+  if (list.spreadsheetId) {
+    url.searchParams.set('spreadsheet_id', list.spreadsheetId);
+  }
+  return url.toString();
+}
+
+// Загрузка конфигурации
+async function loadConfig() {
+  try {
+    // Сначала пробуем загрузить из localStorage (если пользователь добавлял категории)
+    const savedConfig = localStorage.getItem('ya-v-dele-config');
+    if (savedConfig) {
+      try {
+        appConfig = JSON.parse(savedConfig);
+        console.log('✅ Конфигурация загружена из localStorage');
+      } catch (e) {
+        console.warn('⚠️ Ошибка парсинга сохранённой конфигурации');
+      }
+    }
+    
+    // Если нет в localStorage, загружаем из config.json
+    if (!appConfig) {
+      const response = await fetch('/config.json');
+      appConfig = await response.json();
+      console.log('✅ Конфигурация загружена из config.json');
+    }
+    
+    // Загружаем сохранённые значения из localStorage
+    const savedCategory = localStorage.getItem('ya-v-dele-current-category');
+    const savedList = localStorage.getItem('ya-v-dele-current-list');
+    
+    if (savedCategory && appConfig.categories.find(c => c.id === savedCategory)) {
+      currentCategoryId = savedCategory;
+    } else {
+      currentCategoryId = appConfig.currentCategory || appConfig.categories[0]?.id;
+    }
+    
+    if (savedList) {
+      const category = appConfig.categories.find(c => c.id === currentCategoryId);
+      if (category && category.lists.find(l => l.id === savedList)) {
+        currentListId = savedList;
+      } else {
+        currentListId = category?.lists[0]?.id || null;
+      }
+    } else {
+      const category = appConfig.categories.find(c => c.id === currentCategoryId);
+      currentListId = category?.lists[0]?.id || null;
+    }
+    
+    console.log('✅ Конфигурация загружена:', appConfig);
+    return true;
+  } catch (error) {
+    console.error('❌ Ошибка загрузки конфигурации:', error);
+    // Fallback на базовую конфигурацию
+    appConfig = {
+      categories: [
+        {
+          id: 'work',
+          name: 'Работа',
+          lists: [{
+            id: 'work-main',
+            name: 'Основной список',
+            apiUrl: API_BASE_URL
+          }]
+        },
+        {
+          id: 'family',
+          name: 'Семья',
+          lists: []
+        }
+      ],
+      currentCategory: 'work',
+      currentList: 'work-main'
+    };
+    currentCategoryId = 'work';
+    currentListId = 'work-main';
+    return false;
+  }
+}
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', async () => {
   // Регистрируем Service Worker
   registerServiceWorker();
   
+  // Загружаем конфигурацию
+  await loadConfig();
+  
+  initSidebar();
   initTabs();
   initFilters();
   initSearch();
@@ -85,14 +191,30 @@ async function loadDataFromAPI() {
     isLoading = true;
     showLoadingIndicator();
     
-    const response = await fetch(API_URL);
+    // Получаем spreadsheet_id из текущего списка
+    let apiUrl = getCurrentAPIUrl();
+    if (appConfig && currentCategoryId && currentListId) {
+      const category = appConfig.categories.find(c => c.id === currentCategoryId);
+      if (category) {
+        const list = category.lists.find(l => l.id === currentListId);
+        if (list && list.spreadsheetId && !list.apiUrl) {
+          // Если есть spreadsheetId, добавляем его как параметр
+          const url = new URL(API_BASE_URL);
+          url.searchParams.set('spreadsheet_id', list.spreadsheetId);
+          apiUrl = url.toString();
+        }
+      }
+    }
+    
+    const response = await fetch(apiUrl);
     const data = await response.json();
     
     if (data && data.lists) {
       window.APP_DATA = data;
       // Сохраняем в localStorage как fallback для офлайна
       try {
-        localStorage.setItem('ya-v-dele-data', JSON.stringify(data));
+        const cacheKey = `ya-v-dele-data-${currentListId || 'default'}`;
+        localStorage.setItem(cacheKey, JSON.stringify(data));
         console.log(`💾 Данные сохранены в кеш: ${data.lists.length} списков`);
       } catch (e) {
         console.error('❌ Ошибка сохранения в кеш:', e);
@@ -157,12 +279,28 @@ async function refreshDataInBackground() {
   }
   
   try {
-    const response = await fetch(API_URL);
+    // Получаем spreadsheet_id из текущего списка
+    let apiUrl = getCurrentAPIUrl();
+    if (appConfig && currentCategoryId && currentListId) {
+      const category = appConfig.categories.find(c => c.id === currentCategoryId);
+      if (category) {
+        const list = category.lists.find(l => l.id === currentListId);
+        if (list && list.spreadsheetId && !list.apiUrl) {
+          // Если есть spreadsheetId, добавляем его как параметр
+          const url = new URL(API_BASE_URL);
+          url.searchParams.set('spreadsheet_id', list.spreadsheetId);
+          apiUrl = url.toString();
+        }
+      }
+    }
+    
+    const response = await fetch(apiUrl);
     const data = await response.json();
     
     if (data && data.lists) {
       window.APP_DATA = data;
-      localStorage.setItem('ya-v-dele-data', JSON.stringify(data));
+      const cacheKey = `ya-v-dele-data-${currentListId || 'default'}`;
+      localStorage.setItem(cacheKey, JSON.stringify(data));
       console.log('🔄 Данные обновлены в фоне');
       
       // Обновляем интерфейс только если данные изменились
@@ -177,7 +315,8 @@ async function refreshDataInBackground() {
 
 // Загрузка из localStorage (офлайн fallback)
 function loadFromLocalStorage() {
-  const cached = localStorage.getItem('ya-v-dele-data');
+  const cacheKey = `ya-v-dele-data-${currentListId || 'default'}`;
+  const cached = localStorage.getItem(cacheKey);
   console.log('🔍 Проверка кеша:', cached ? 'данные найдены' : 'кеш пуст');
   if (cached) {
     try {
@@ -198,10 +337,29 @@ async function saveToAPI(action, data) {
   // Сохраняем локально сразу
   saveDataLocally();
   
+  // Получаем spreadsheet_id из текущего списка
+  let spreadsheetId = null;
+  if (appConfig && currentCategoryId && currentListId) {
+    const category = appConfig.categories.find(c => c.id === currentCategoryId);
+    if (category) {
+      const list = category.lists.find(l => l.id === currentListId);
+      if (list && list.spreadsheetId) {
+        spreadsheetId = list.spreadsheetId;
+      }
+    }
+  }
+  
+  // Добавляем spreadsheet_id в данные запроса
+  const payload = {
+    action,
+    ...data,
+    ...(spreadsheetId && { spreadsheet_id: spreadsheetId })
+  };
+  
   // Проверяем онлайн ли мы
   if (!navigator.onLine) {
     // Офлайн — добавляем в очередь
-    addToSyncQueue(action, data);
+    addToSyncQueue(action, payload);
     showToast('📴 Сохранено локально');
     return false;
   }
@@ -210,12 +368,12 @@ async function saveToAPI(action, data) {
     showToast('Сохранение...');
     
     // Используем redirect: 'follow' для Apps Script
-    const response = await fetch(API_URL, {
+    const response = await fetch(getCurrentAPIUrl(), {
       method: 'POST',
       headers: {
         'Content-Type': 'text/plain',
       },
-      body: JSON.stringify({ action, ...data }),
+      body: JSON.stringify(payload),
       redirect: 'follow'
     });
     
@@ -235,7 +393,8 @@ async function saveToAPI(action, data) {
 // Сохранить данные локально
 function saveDataLocally() {
   if (window.APP_DATA) {
-    localStorage.setItem('ya-v-dele-data', JSON.stringify(window.APP_DATA));
+    const cacheKey = `ya-v-dele-data-${currentListId || 'default'}`;
+    localStorage.setItem(cacheKey, JSON.stringify(window.APP_DATA));
   }
 }
 
@@ -311,7 +470,7 @@ async function processSyncQueue() {
   
   for (const item of queue) {
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch(getCurrentAPIUrl(), {
         method: 'POST',
         headers: { 'Content-Type': 'text/plain' },
         body: JSON.stringify({ action: item.action, ...item.data }),
@@ -642,7 +801,368 @@ function showDatePickerModal(task, listId) {
   document.addEventListener('keydown', handleEscape);
 }
 
+// Модалка добавления категории
+function showAddCategoryModal() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  
+  const title = document.createElement('h3');
+  title.className = 'modal__title';
+  title.textContent = 'Добавить категорию';
+  
+  const input = document.createElement('input');
+  input.type = 'text';
+  input.className = 'modal__input';
+  input.placeholder = 'Название категории';
+  input.autofocus = true;
+  
+  const actions = document.createElement('div');
+  actions.className = 'modal__actions';
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'modal__btn modal__btn--secondary';
+  cancelBtn.textContent = 'Отмена';
+  cancelBtn.addEventListener('click', () => overlay.remove());
+  
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'modal__btn modal__btn--primary';
+  saveBtn.textContent = 'Добавить';
+  saveBtn.addEventListener('click', () => {
+    const name = input.value.trim();
+    if (name) {
+      const newCategory = {
+        id: `cat-${Date.now()}`,
+        name: name,
+        lists: []
+      };
+      appConfig.categories.push(newCategory);
+      saveConfig();
+      renderSidebar();
+      overlay.remove();
+      showToast('Категория добавлена');
+    }
+  });
+  
+  actions.appendChild(cancelBtn);
+  actions.appendChild(saveBtn);
+  
+  modal.appendChild(title);
+  modal.appendChild(input);
+  modal.appendChild(actions);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveBtn.click();
+    if (e.key === 'Escape') overlay.remove();
+  });
+  
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+// Модалка добавления списка
+function showAddListModal(categoryId) {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  
+  const modal = document.createElement('div');
+  modal.className = 'modal';
+  
+  const title = document.createElement('h3');
+  title.className = 'modal__title';
+  title.textContent = 'Добавить список';
+  
+  const nameInput = document.createElement('input');
+  nameInput.type = 'text';
+  nameInput.className = 'modal__input';
+  nameInput.placeholder = 'Название списка';
+  nameInput.autofocus = true;
+  
+  const spreadsheetInput = document.createElement('input');
+  spreadsheetInput.type = 'text';
+  spreadsheetInput.className = 'modal__input';
+  spreadsheetInput.placeholder = 'ID Google Sheets (опционально)';
+  
+  const actions = document.createElement('div');
+  actions.className = 'modal__actions';
+  
+  const cancelBtn = document.createElement('button');
+  cancelBtn.className = 'modal__btn modal__btn--secondary';
+  cancelBtn.textContent = 'Отмена';
+  cancelBtn.addEventListener('click', () => overlay.remove());
+  
+  const saveBtn = document.createElement('button');
+  saveBtn.className = 'modal__btn modal__btn--primary';
+  saveBtn.textContent = 'Добавить';
+  saveBtn.addEventListener('click', () => {
+    const name = nameInput.value.trim();
+    if (name) {
+      const category = appConfig.categories.find(c => c.id === categoryId);
+      if (category) {
+        const newList = {
+          id: `list-${Date.now()}`,
+          name: name,
+          spreadsheetId: spreadsheetInput.value.trim() || '',
+          apiUrl: API_BASE_URL
+        };
+        category.lists.push(newList);
+        saveConfig();
+        renderSidebar();
+        overlay.remove();
+        showToast('Список добавлен');
+      }
+    }
+  });
+  
+  actions.appendChild(cancelBtn);
+  actions.appendChild(saveBtn);
+  
+  modal.appendChild(title);
+  modal.appendChild(nameInput);
+  modal.appendChild(spreadsheetInput);
+  modal.appendChild(actions);
+  overlay.appendChild(modal);
+  document.body.appendChild(overlay);
+  
+  nameInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      if (spreadsheetInput.value.trim()) {
+        spreadsheetInput.focus();
+      } else {
+        saveBtn.click();
+      }
+    }
+    if (e.key === 'Escape') overlay.remove();
+  });
+  
+  spreadsheetInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') saveBtn.click();
+    if (e.key === 'Escape') overlay.remove();
+  });
+  
+  overlay.addEventListener('click', (e) => {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
+// Сохранение конфигурации (пока в localStorage, потом можно на сервер)
+function saveConfig() {
+  localStorage.setItem('ya-v-dele-config', JSON.stringify(appConfig));
+  // TODO: Сохранить на сервер (config.json)
+}
+
 // Инициализация табов
+// Инициализация боковой панели
+function initSidebar() {
+  const menuBtn = document.getElementById('menu-btn');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarOverlay = document.getElementById('sidebar-overlay');
+  const sidebarClose = document.getElementById('sidebar-close');
+  
+  console.log('🔍 Инициализация sidebar:', { menuBtn, sidebar, sidebarOverlay, sidebarClose });
+  
+  if (!menuBtn) {
+    console.error('❌ Кнопка меню не найдена!');
+    return;
+  }
+  
+  if (!sidebar) {
+    console.error('❌ Sidebar не найден!');
+    return;
+  }
+  
+  // Открытие боковой панели
+  menuBtn.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    console.log('🖱️ Клик по меню');
+    sidebar.classList.add('is-open');
+    if (sidebarOverlay) {
+      sidebarOverlay.classList.add('is-open');
+    }
+    document.body.style.overflow = 'hidden';
+  });
+  
+  // Закрытие боковой панели
+  const closeSidebar = () => {
+    sidebar?.classList.remove('is-open');
+    sidebarOverlay?.classList.remove('is-open');
+    document.body.style.overflow = '';
+  };
+  
+  sidebarClose?.addEventListener('click', closeSidebar);
+  sidebarOverlay?.addEventListener('click', closeSidebar);
+  
+  // Рендерим содержимое боковой панели
+  if (appConfig) {
+    renderSidebar();
+  } else {
+    console.warn('⚠️ appConfig не загружен, sidebar будет пустым');
+  }
+  
+  // Инициализация кнопки добавления категории
+  const addCategoryBtn = document.getElementById('add-category-btn');
+  if (addCategoryBtn) {
+    addCategoryBtn.addEventListener('click', () => {
+      showAddCategoryModal();
+    });
+  } else {
+    console.warn('⚠️ Кнопка добавления категории не найдена');
+  }
+  
+  console.log('✅ Sidebar инициализирован');
+}
+
+// Рендеринг боковой панели
+function renderSidebar() {
+  const content = document.getElementById('sidebar-content');
+  if (!content) {
+    console.error('❌ sidebar-content не найден!');
+    return;
+  }
+  
+  if (!appConfig) {
+    console.error('❌ appConfig не загружен!');
+    return;
+  }
+  
+  console.log('🎨 Рендеринг sidebar с категориями:', appConfig.categories.length);
+  
+  content.innerHTML = '';
+  
+  if (appConfig.categories.length === 0) {
+    content.innerHTML = '<div style="padding: 20px; text-align: center; color: var(--text-muted);">Нет категорий</div>';
+    return;
+  }
+  
+  appConfig.categories.forEach(category => {
+    const categoryEl = createCategoryElement(category);
+    content.appendChild(categoryEl);
+  });
+}
+
+// Создание элемента категории
+function createCategoryElement(category) {
+  const categoryDiv = document.createElement('div');
+  categoryDiv.className = 'sidebar-category';
+  if (category.id === currentCategoryId) {
+    categoryDiv.classList.add('is-active');
+  }
+  
+  const categoryHeader = document.createElement('div');
+  categoryHeader.className = 'sidebar-category__header';
+  categoryHeader.innerHTML = `
+    <span class="sidebar-category__name">${category.name}</span>
+    <button class="sidebar-category__toggle" data-category-id="${category.id}">▼</button>
+  `;
+  
+  const categoryLists = document.createElement('div');
+  categoryLists.className = 'sidebar-category__lists';
+  if (category.id === currentCategoryId) {
+    categoryLists.classList.add('is-expanded');
+  }
+  
+  category.lists.forEach(list => {
+    const listItem = document.createElement('div');
+    listItem.className = 'sidebar-list';
+    if (list.id === currentListId && category.id === currentCategoryId) {
+      listItem.classList.add('is-active');
+    }
+    listItem.innerHTML = `<span class="sidebar-list__name">${list.name}</span>`;
+    listItem.addEventListener('click', () => {
+      selectList(category.id, list.id);
+    });
+    categoryLists.appendChild(listItem);
+  });
+  
+  // Кнопка добавления списка
+  const addListBtn = document.createElement('button');
+  addListBtn.className = 'sidebar-list__add';
+  addListBtn.textContent = '+ Добавить список';
+  addListBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    showAddListModal(category.id);
+  });
+  categoryLists.appendChild(addListBtn);
+  
+  // Переключение категории
+  categoryHeader.addEventListener('click', () => {
+    const isExpanded = categoryLists.classList.contains('is-expanded');
+    if (isExpanded) {
+      categoryLists.classList.remove('is-expanded');
+      categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▶';
+    } else {
+      // Закрываем все остальные категории
+      document.querySelectorAll('.sidebar-category__lists').forEach(el => {
+        el.classList.remove('is-expanded');
+      });
+      document.querySelectorAll('.sidebar-category__toggle').forEach(el => {
+        el.textContent = '▶';
+      });
+      
+      categoryLists.classList.add('is-expanded');
+      categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▼';
+    }
+  });
+  
+  // Устанавливаем правильную иконку
+  if (categoryLists.classList.contains('is-expanded')) {
+    categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▼';
+  } else {
+    categoryHeader.querySelector('.sidebar-category__toggle').textContent = '▶';
+  }
+  
+  categoryDiv.appendChild(categoryHeader);
+  categoryDiv.appendChild(categoryLists);
+  
+  return categoryDiv;
+}
+
+// Выбор списка
+async function selectList(categoryId, listId) {
+  if (categoryId === currentCategoryId && listId === currentListId) {
+    // Уже выбран, просто закрываем панель
+    document.getElementById('sidebar')?.classList.remove('is-open');
+    document.getElementById('sidebar-overlay')?.classList.remove('is-open');
+    document.body.style.overflow = '';
+    return;
+  }
+  
+  currentCategoryId = categoryId;
+  currentListId = listId;
+  
+  localStorage.setItem('ya-v-dele-current-category', categoryId);
+  localStorage.setItem('ya-v-dele-current-list', listId);
+  
+  // Обновляем UI
+  renderSidebar();
+  
+  // Закрываем панель
+  document.getElementById('sidebar')?.classList.remove('is-open');
+  document.getElementById('sidebar-overlay')?.classList.remove('is-open');
+  document.body.style.overflow = '';
+  
+  // Загружаем данные
+  showToast('Загрузка...');
+  
+  // Сначала пробуем загрузить из кеша
+  loadFromLocalStorage();
+  if (window.APP_DATA && window.APP_DATA.lists && window.APP_DATA.lists.length > 0) {
+    renderLists();
+    updateCounts();
+    // Обновляем в фоне
+    refreshDataInBackground();
+  } else {
+    // Данных нет в кеше — загружаем с индикатором
+    await loadDataFromAPI();
+  }
+}
+
 function initTabs() {
   const tabs = document.querySelectorAll('.tab');
   tabs.forEach(tab => {

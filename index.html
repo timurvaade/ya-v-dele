@@ -38,10 +38,25 @@
 </head>
 <body>
     <div class="app">
+        <!-- Боковая панель (Sidebar) -->
+        <div class="sidebar" id="sidebar">
+            <div class="sidebar__header">
+                <h2 class="sidebar__title">Категории</h2>
+                <button class="sidebar__close" id="sidebar-close" aria-label="Закрыть">×</button>
+            </div>
+            <div class="sidebar__content" id="sidebar-content">
+                <!-- Заполняется через JavaScript -->
+            </div>
+            <div class="sidebar__footer">
+                <button class="sidebar__add-btn" id="add-category-btn">+ Добавить категорию</button>
+            </div>
+        </div>
+        <div class="sidebar-overlay" id="sidebar-overlay"></div>
+        
         <div class="screen">
             <!-- Верхняя панель с поиском -->
             <div class="topbar">
-                <button class="menu-btn" aria-label="Menu">
+                <button class="menu-btn" id="menu-btn" aria-label="Menu">
                     <span></span>
                     <span></span>
                     <span></span>

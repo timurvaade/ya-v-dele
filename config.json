@@ -1,0 +1,23 @@
+{
+  "categories": [
+    {
+      "id": "work",
+      "name": "Работа",
+      "lists": [
+        {
+          "id": "work-main",
+          "name": "Основной список",
+          "spreadsheetId": "",
+          "apiUrl": "https://script.google.com/macros/s/AKfycbws_FqfDdYUoORdmJDy9-UhqSXD-l0ahNIptB3s6bIpFw88n4cr_a-kEWPselcBgrGk/exec"
+        }
+      ]
+    },
+    {
+      "id": "family",
+      "name": "Семья",
+      "lists": []
+    }
+  ],
+  "currentCategory": "work",
+  "currentList": "work-main"
+}
