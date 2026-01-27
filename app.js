@@ -20,11 +20,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   initCurrentDate();
   initPullToRefresh();
   
-  // Загружаем данные из Google Sheets
-  await loadDataFromAPI();
+  // Сначала загружаем из кеша и показываем сразу
+  loadFromLocalStorage();
+  if (window.APP_DATA) {
+    renderLists();
+    updateCounts();
+  }
   
-  renderLists();
-  updateCounts();
+  // Затем обновляем в фоне (без показа индикатора)
+  refreshDataInBackground();
   
   // Проверяем очередь синхронизации
   updateSyncBadge();
@@ -62,7 +66,7 @@ function registerServiceWorker() {
   }
 }
 
-// Загрузка данных из Google Sheets API
+// Загрузка данных из Google Sheets API (с индикатором загрузки)
 async function loadDataFromAPI() {
   try {
     isLoading = true;
@@ -78,16 +82,30 @@ async function loadDataFromAPI() {
       console.log('✅ Данные загружены из Google Sheets:', data);
       
       // Логируем категории для отладки
-      data.lists.forEach(list => {
-        list.items?.forEach(item => {
-          if (item.category || item.tags) {
-            console.log(`📋 Задача "${item.title}": category="${item.category}", tags="${item.tags}"`);
+      try {
+        data.lists.forEach(list => {
+          if (Array.isArray(list.items)) {
+            list.items.forEach(item => {
+              if (item && (item.category || item.tags)) {
+                console.log(`📋 Задача "${item.title || 'без названия'}": category="${item.category || ''}", tags="${item.tags || ''}"`);
+              }
+            });
           }
         });
-      });
+      } catch (logError) {
+        console.warn('⚠️ Ошибка логирования категорий:', logError);
+      }
+      
+      // Обновляем интерфейс
+      renderLists();
+      updateCounts();
     } else if (data.offline) {
       // Офлайн режим — загружаем из localStorage
       loadFromLocalStorage();
+      if (window.APP_DATA) {
+        renderLists();
+        updateCounts();
+      }
       showToast('📴 Офлайн режим');
     } else {
       console.error('❌ Неверный формат данных:', data);
@@ -96,10 +114,40 @@ async function loadDataFromAPI() {
     console.error('❌ Ошибка загрузки данных:', error);
     // Пробуем загрузить из localStorage
     loadFromLocalStorage();
+    if (window.APP_DATA) {
+      renderLists();
+      updateCounts();
+    }
     showToast('📴 Офлайн режим');
   } finally {
     isLoading = false;
     hideLoadingIndicator();
+  }
+}
+
+// Фоновое обновление данных (без индикатора загрузки)
+async function refreshDataInBackground() {
+  if (!navigator.onLine) {
+    console.log('📴 Офлайн — пропускаем обновление');
+    return;
+  }
+  
+  try {
+    const response = await fetch(API_URL);
+    const data = await response.json();
+    
+    if (data && data.lists) {
+      window.APP_DATA = data;
+      localStorage.setItem('ya-v-dele-data', JSON.stringify(data));
+      console.log('🔄 Данные обновлены в фоне');
+      
+      // Обновляем интерфейс только если данные изменились
+      renderLists();
+      updateCounts();
+    }
+  } catch (error) {
+    console.warn('⚠️ Ошибка фонового обновления:', error);
+    // Не показываем ошибку пользователю при фоновом обновлении
   }
 }
 
@@ -855,8 +903,6 @@ function initPullToRefresh() {
       indicator.querySelector('.pull-indicator__icon').textContent = '⟳';
       
       loadDataFromAPI().then(() => {
-        renderLists();
-        updateCounts();
         resetIndicator();
       });
     } else {
@@ -1402,15 +1448,29 @@ function createTaskElement(task, listId) {
   taskHeader.className = 'task-header';
   
   // Поддержка category и tags (может быть строка или массив)
-  const category = task.category || task.tags || '';
-  const categoryValue = Array.isArray(category) ? category[0] : category;
-  
-  if (categoryValue && categoryValue.trim()) {
+  try {
+    const category = task.category || task.tags || '';
+    let categoryValue = '';
+    
+    if (Array.isArray(category)) {
+      categoryValue = category[0] || '';
+    } else if (typeof category === 'string') {
+      categoryValue = category;
+    } else if (category) {
+      categoryValue = String(category);
+    }
+    
+    categoryValue = String(categoryValue).trim();
+    
+    if (categoryValue) {
     const pill = document.createElement('span');
-    const color = getCategoryColor(categoryValue);
-    pill.className = `pill pill--${color}`;
-    pill.textContent = categoryValue;
+      const color = getCategoryColor(categoryValue);
+      pill.className = `pill pill--${color}`;
+      pill.textContent = categoryValue;
     taskHeader.appendChild(pill);
+    }
+  } catch (error) {
+    console.error('❌ Ошибка создания тега:', error, task);
   }
   
   // Правая часть заголовка (ответственные + меню)
