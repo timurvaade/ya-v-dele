@@ -714,10 +714,17 @@ body {
   height: 28px;
   background: none;
   border: none;
-  font-size: 14px;
   cursor: pointer;
   color: var(--text-light);
   transition: transform 0.3s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.toggle-btn svg {
+  display: block;
 }
 
 /* Полностью открыто — стрелка на 180° */
@@ -796,10 +803,13 @@ body {
   display: flex;
   align-items: center;
   padding: 0 20px;
-  font-size: 20px;
   color: white;
   opacity: 0;
   transition: opacity 0.2s ease;
+}
+
+.task-swipe-bg svg {
+  display: block;
 }
 
 .task-swipe-bg--left {
@@ -1068,6 +1078,11 @@ body {
   transition: background 0.15s ease;
 }
 
+.task-dropdown__item svg {
+  display: block;
+  flex-shrink: 0;
+}
+
 .task-dropdown__item:hover {
   background: rgba(0, 0, 0, 0.04);
 }
@@ -1168,9 +1183,14 @@ body {
   position: absolute;
   right: 40px;
   top: 14px; /* фиксированная позиция от верха */
-  font-size: 10px;
   color: var(--text-light);
   display: none;
+  align-items: center;
+  justify-content: center;
+}
+
+.description-arrow svg {
+  display: block;
 }
 
 .description-block.has-overflow .description-arrow {
@@ -1191,7 +1211,6 @@ body {
   height: 28px;
   background: none;
   border: none;
-  font-size: 14px;
   color: var(--text-light);
   cursor: pointer;
   display: flex;
@@ -1200,6 +1219,11 @@ body {
   border-radius: 6px;
   transition: all 0.2s ease;
   opacity: 0.6;
+  padding: 0;
+}
+
+.description-edit-icon svg {
+  display: block;
 }
 
 .description-edit-icon:hover {
@@ -1633,9 +1657,15 @@ body {
 }
 
 .pull-indicator__icon {
-  font-size: 20px;
   color: var(--text-light);
   transition: transform 0.2s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pull-indicator__icon svg {
+  display: block;
 }
 
 .pull-indicator.is-ready .pull-indicator__icon {
@@ -1659,9 +1689,9 @@ body {
 /* Mobile-first: базовые стили уже для мобильных */
 
 /* Горизонтальная прокрутка табов и фильтров на мобильных */
-.tabs {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
+  .tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
   scrollbar-width: none;
 }
 

@@ -367,8 +367,8 @@ async function loadDataFromAPI() {
       }
       
       // Обновляем интерфейс
-      renderLists();
-      updateCounts();
+  renderLists();
+  updateCounts();
     } else if (data.offline) {
       // Офлайн режим — загружаем из localStorage
       loadFromLocalStorage();
@@ -1525,6 +1525,26 @@ function initFilters() {
 // Инициализация FAB кнопки
 function initFAB() {
   const fab = document.querySelector('.fab');
+  if (!fab) return;
+  
+  // Загружаем иконку плюса
+  loadIconSVG('plus').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '24');
+        svgElement.setAttribute('height', '24');
+        svgElement.style.color = 'white';
+        fab.innerHTML = '';
+        fab.appendChild(svgElement);
+      }
+    } else {
+      fab.textContent = '+'; // Fallback
+    }
+  });
+  
   fab.addEventListener('click', () => {
     showCreateListModal();
   });
@@ -1714,7 +1734,32 @@ function initPullToRefresh() {
   // Создаём индикатор
   const indicator = document.createElement('div');
   indicator.className = 'pull-indicator';
-  indicator.innerHTML = '<span class="pull-indicator__icon">↓</span><span class="pull-indicator__text">Потяните для обновления</span>';
+  
+  const iconSpan = document.createElement('span');
+  iconSpan.className = 'pull-indicator__icon';
+  
+  const textSpan = document.createElement('span');
+  textSpan.className = 'pull-indicator__text';
+  textSpan.textContent = 'Потяните для обновления';
+  
+  // Загружаем иконку стрелки вниз
+  loadIconSVG('arrow-down').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '20');
+        svgElement.setAttribute('height', '20');
+        iconSpan.appendChild(svgElement);
+      }
+    } else {
+      iconSpan.textContent = '↓'; // Fallback
+    }
+  });
+  
+  indicator.appendChild(iconSpan);
+  indicator.appendChild(textSpan);
   screen.insertBefore(indicator, screen.firstChild);
 
   screen.addEventListener('touchstart', (e) => {
@@ -1753,7 +1798,24 @@ function initPullToRefresh() {
       // Выполняем обновление — загружаем свежие данные из API
       indicator.classList.add('is-loading');
       indicator.querySelector('.pull-indicator__text').textContent = 'Обновление...';
-      indicator.querySelector('.pull-indicator__icon').textContent = '⟳';
+      
+      // Заменяем иконку на refresh
+      const iconElement = indicator.querySelector('.pull-indicator__icon');
+      loadIconSVG('refresh').then(svgText => {
+        if (svgText) {
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgElement = svgDoc.querySelector('svg');
+          if (svgElement) {
+            svgElement.setAttribute('width', '20');
+            svgElement.setAttribute('height', '20');
+            iconElement.innerHTML = '';
+            iconElement.appendChild(svgElement);
+          }
+        } else {
+          iconElement.textContent = '⟳'; // Fallback
+        }
+      });
       
       loadDataFromAPI().then(() => {
         resetIndicator();
@@ -1769,8 +1831,25 @@ function initPullToRefresh() {
     indicator.style.height = '0';
     indicator.style.opacity = '0';
     indicator.classList.remove('is-ready', 'is-loading');
-    indicator.querySelector('.pull-indicator__icon').textContent = '↓';
     indicator.querySelector('.pull-indicator__text').textContent = 'Потяните для обновления';
+    
+    // Возвращаем иконку стрелки вниз
+    const iconElement = indicator.querySelector('.pull-indicator__icon');
+    loadIconSVG('arrow-down').then(svgText => {
+      if (svgText) {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        if (svgElement) {
+          svgElement.setAttribute('width', '20');
+          svgElement.setAttribute('height', '20');
+          iconElement.innerHTML = '';
+          iconElement.appendChild(svgElement);
+        }
+      } else {
+        iconElement.textContent = '↓'; // Fallback
+      }
+    });
   }
 }
 
@@ -1956,8 +2035,23 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'toggle-btn';
-  toggleBtn.textContent = '▼';
   toggleBtn.setAttribute('aria-label', 'Toggle');
+  
+  // Загружаем иконку стрелки вниз
+  loadIconSVG('chevron-down').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '16');
+        svgElement.setAttribute('height', '16');
+        toggleBtn.appendChild(svgElement);
+      }
+    } else {
+      toggleBtn.textContent = '▼'; // Fallback
+    }
+  });
   
   head.appendChild(headLeft);
   head.appendChild(toggleBtn);
@@ -2341,7 +2435,25 @@ function createTaskElement(task, listId) {
   const taskMenuBtn = document.createElement('button');
   taskMenuBtn.className = 'task-menu';
   taskMenuBtn.type = 'button';
-  taskMenuBtn.textContent = '⋮';
+  taskMenuBtn.setAttribute('aria-label', 'Меню задачи');
+  
+  // Загружаем иконку трёх точек
+  loadIconSVG('more-vertical').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '20');
+        svgElement.setAttribute('height', '20');
+        taskMenuBtn.innerHTML = '';
+        taskMenuBtn.appendChild(svgElement);
+      }
+    } else {
+      // Fallback на текст
+      taskMenuBtn.textContent = '⋮';
+    }
+  });
 
   const dropdown = document.createElement('div');
   dropdown.className = 'task-dropdown';
@@ -2350,7 +2462,30 @@ function createTaskElement(task, listId) {
   const editBtn = document.createElement('button');
   editBtn.className = 'task-dropdown__item';
   editBtn.type = 'button';
-  editBtn.innerHTML = '✏️ Редактировать';
+  
+  // Создаём контейнер для иконки и текста
+  const editContent = document.createElement('span');
+  editContent.style.display = 'flex';
+  editContent.style.alignItems = 'center';
+  editContent.style.gap = '8px';
+  
+  // Загружаем иконку редактирования
+  loadIconSVG('edit').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '18');
+        svgElement.setAttribute('height', '18');
+        editContent.appendChild(svgElement);
+      }
+    }
+  });
+  
+  const editText = document.createTextNode('Редактировать');
+  editContent.appendChild(editText);
+  editBtn.appendChild(editContent);
   editBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
     // Находим label с названием задачи
@@ -2365,7 +2500,17 @@ function createTaskElement(task, listId) {
   dateBtn.className = 'task-dropdown__item';
   dateBtn.type = 'button';
   const currentDate = task.due_date ? formatDate(task.due_date) : 'не указана';
-  dateBtn.innerHTML = `📅 Дата: ${currentDate}`;
+  
+  // Создаём контейнер для иконки и текста
+  const dateContent = document.createElement('span');
+  dateContent.style.display = 'flex';
+  dateContent.style.alignItems = 'center';
+  dateContent.style.gap = '8px';
+  
+  // Пока используем текст, иконку календаря добавим позже
+  const dateText = document.createTextNode(`Дата: ${currentDate}`);
+  dateContent.appendChild(dateText);
+  dateBtn.appendChild(dateContent);
   dateBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
     showDatePickerModal(task, listId);
@@ -2375,7 +2520,31 @@ function createTaskElement(task, listId) {
   const riskBtn = document.createElement('button');
   riskBtn.className = 'task-dropdown__item';
   riskBtn.type = 'button';
-  riskBtn.innerHTML = task.status === 'risk' ? '✅ Убрать из риска' : '⚠️ В риске';
+  
+  const isRisk = task.status === 'risk';
+  const riskContent = document.createElement('span');
+  riskContent.style.display = 'flex';
+  riskContent.style.alignItems = 'center';
+  riskContent.style.gap = '8px';
+  
+  // Загружаем иконку (check для убрать, или используем существующую для риска)
+  const iconName = isRisk ? 'check' : 'check'; // Пока используем check для обоих, можно добавить alert позже
+  loadIconSVG(iconName).then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '18');
+        svgElement.setAttribute('height', '18');
+        riskContent.insertBefore(svgElement, riskContent.firstChild);
+      }
+    }
+  });
+  
+  const riskText = document.createTextNode(isRisk ? 'Убрать из риска' : 'В риске');
+  riskContent.appendChild(riskText);
+  riskBtn.appendChild(riskContent);
   riskBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
     task.status = task.status === 'risk' ? 'open' : 'risk';
@@ -2388,7 +2557,29 @@ function createTaskElement(task, listId) {
   const deleteBtn = document.createElement('button');
   deleteBtn.className = 'task-dropdown__item task-dropdown__item--danger';
   deleteBtn.type = 'button';
-  deleteBtn.innerHTML = '🗑️ Удалить';
+  
+  const deleteContent = document.createElement('span');
+  deleteContent.style.display = 'flex';
+  deleteContent.style.alignItems = 'center';
+  deleteContent.style.gap = '8px';
+  
+  // Загружаем иконку удаления
+  loadIconSVG('trash').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '18');
+        svgElement.setAttribute('height', '18');
+        deleteContent.appendChild(svgElement);
+      }
+    }
+  });
+  
+  const deleteText = document.createTextNode('Удалить');
+  deleteContent.appendChild(deleteText);
+  deleteBtn.appendChild(deleteContent);
   deleteBtn.addEventListener('click', () => {
     dropdown.classList.remove('is-open');
     showConfirmModal({
@@ -2473,8 +2664,23 @@ function createTaskElement(task, listId) {
     const editIcon = document.createElement('button');
     editIcon.className = 'description-edit-icon';
     editIcon.type = 'button';
-    editIcon.innerHTML = '✎';
     editIcon.title = 'Редактировать';
+    
+    // Загружаем иконку редактирования
+    loadIconSVG('edit').then(svgText => {
+      if (svgText) {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        if (svgElement) {
+          svgElement.setAttribute('width', '16');
+          svgElement.setAttribute('height', '16');
+          editIcon.appendChild(svgElement);
+        }
+      } else {
+        editIcon.innerHTML = '✎'; // Fallback
+      }
+    });
     editIcon.addEventListener('click', (e) => {
       e.stopPropagation();
       showEditDescriptionInput(task, descBlock, descText, listId);
@@ -2484,7 +2690,23 @@ function createTaskElement(task, listId) {
     // Стрелка (скрыта по умолчанию, видна только если overflow)
     const descArrow = document.createElement('span');
     descArrow.className = 'description-arrow';
-    descArrow.textContent = '▼'; // вниз = развернуть
+    
+    // Загружаем иконку стрелки вниз
+    loadIconSVG('chevron-down').then(svgText => {
+      if (svgText) {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        if (svgElement) {
+          svgElement.setAttribute('width', '14');
+          svgElement.setAttribute('height', '14');
+          descArrow.appendChild(svgElement);
+        }
+      } else {
+        descArrow.textContent = '▼'; // Fallback
+      }
+    });
+    
     descBlock.appendChild(descArrow);
 
     // Проверяем overflow после рендера
@@ -2500,7 +2722,24 @@ function createTaskElement(task, listId) {
       if (!descBlock.classList.contains('has-overflow') && !descBlock.classList.contains('is-open')) return;
       
       const isOpen = descBlock.classList.toggle('is-open');
-      descArrow.textContent = isOpen ? '▲' : '▼'; // вверх = свернуть
+      
+      // Обновляем иконку стрелки
+      const iconName = isOpen ? 'chevron-up' : 'chevron-down';
+      loadIconSVG(iconName).then(svgText => {
+        if (svgText) {
+          const parser = new DOMParser();
+          const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+          const svgElement = svgDoc.querySelector('svg');
+          if (svgElement) {
+            svgElement.setAttribute('width', '14');
+            svgElement.setAttribute('height', '14');
+            descArrow.innerHTML = '';
+            descArrow.appendChild(svgElement);
+          }
+        } else {
+          descArrow.textContent = isOpen ? '▲' : '▼'; // Fallback
+        }
+      });
     });
   } else {
     // Кнопка "добавить описание"
@@ -2528,12 +2767,44 @@ function createTaskElement(task, listId) {
   // Фон для свайпа влево (удалить)
   const bgLeft = document.createElement('div');
   bgLeft.className = 'task-swipe-bg task-swipe-bg--left';
-  bgLeft.innerHTML = '🗑️';
+  
+  // Загружаем иконку удаления
+  loadIconSVG('trash').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '32');
+        svgElement.setAttribute('height', '32');
+        svgElement.style.color = 'white';
+        bgLeft.appendChild(svgElement);
+      }
+    } else {
+      bgLeft.innerHTML = '🗑️'; // Fallback
+    }
+  });
   
   // Фон для свайпа вправо (выполнено)
   const bgRight = document.createElement('div');
   bgRight.className = 'task-swipe-bg task-swipe-bg--right';
-  bgRight.innerHTML = '✓';
+  
+  // Загружаем иконку галочки
+  loadIconSVG('check').then(svgText => {
+    if (svgText) {
+      const parser = new DOMParser();
+      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+      const svgElement = svgDoc.querySelector('svg');
+      if (svgElement) {
+        svgElement.setAttribute('width', '32');
+        svgElement.setAttribute('height', '32');
+        svgElement.style.color = 'white';
+        bgRight.appendChild(svgElement);
+      }
+    } else {
+      bgRight.innerHTML = '✓'; // Fallback
+    }
+  });
   
   // Контент (сама задача)
   const swipeContent = document.createElement('div');
