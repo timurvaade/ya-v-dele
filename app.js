@@ -21,8 +21,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   initPullToRefresh();
   
   // Сначала загружаем из кеша и показываем сразу
-  loadFromLocalStorage();
-  if (window.APP_DATA && window.APP_DATA.lists && window.APP_DATA.lists.length > 0) {
+  const hasCache = loadFromLocalStorage();
+  const hasData = window.APP_DATA && 
+                  window.APP_DATA.lists && 
+                  Array.isArray(window.APP_DATA.lists) && 
+                  window.APP_DATA.lists.length > 0;
+  
+  console.log('🔍 Проверка данных:', { hasCache, hasData, listsCount: window.APP_DATA?.lists?.length });
+  
+  if (hasData) {
     // Данные есть в кеше — показываем сразу
     console.log('⚡ Загружено из кеша, показываем сразу');
     hideLoadingIndicator(); // Убеждаемся, что индикатор скрыт
@@ -84,7 +91,12 @@ async function loadDataFromAPI() {
     if (data && data.lists) {
       window.APP_DATA = data;
       // Сохраняем в localStorage как fallback для офлайна
-      localStorage.setItem('ya-v-dele-data', JSON.stringify(data));
+      try {
+        localStorage.setItem('ya-v-dele-data', JSON.stringify(data));
+        console.log(`💾 Данные сохранены в кеш: ${data.lists.length} списков`);
+      } catch (e) {
+        console.error('❌ Ошибка сохранения в кеш:', e);
+      }
       console.log('✅ Данные загружены из Google Sheets:', data);
       
       // Логируем категории для отладки
@@ -160,14 +172,19 @@ async function refreshDataInBackground() {
 // Загрузка из localStorage (офлайн fallback)
 function loadFromLocalStorage() {
   const cached = localStorage.getItem('ya-v-dele-data');
+  console.log('🔍 Проверка кеша:', cached ? 'данные найдены' : 'кеш пуст');
   if (cached) {
     try {
       window.APP_DATA = JSON.parse(cached);
-      console.log('📦 Данные загружены из кэша');
+      const listsCount = window.APP_DATA?.lists?.length || 0;
+      console.log(`📦 Данные загружены из кэша: ${listsCount} списков`);
+      return true;
     } catch (e) {
-      console.error('❌ Ошибка парсинга кэша');
+      console.error('❌ Ошибка парсинга кэша:', e);
+      return false;
     }
   }
+  return false;
 }
 
 // Сохранение изменений в Google Sheets (с очередью для офлайна)
