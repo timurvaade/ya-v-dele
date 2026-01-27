@@ -172,8 +172,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Данные есть в кеше — показываем сразу
     console.log('⚡ Загружено из кеша, показываем сразу');
     hideLoadingIndicator(); // Убеждаемся, что индикатор скрыт
-  renderLists();
-  updateCounts();
+    updateSectionTitle(); // Обновляем заголовок согласно активной вкладке
+    renderLists(); // Рендерим с учётом фильтра
+    updateCounts();
     // Обновляем в фоне (без показа индикатора)
     refreshDataInBackground();
   } else {
