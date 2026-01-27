@@ -192,6 +192,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   document.addEventListener('click', () => {
     document.querySelectorAll('.task-dropdown.is-open').forEach(d => d.classList.remove('is-open'));
   });
+  
+  // Функция для очистки Service Worker (можно вызвать из консоли: clearServiceWorker())
+  window.clearServiceWorker = async function() {
+    if ('serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations();
+      for (let registration of registrations) {
+        await registration.unregister();
+        console.log('✅ Service Worker удалён');
+      }
+      // Очищаем кеш
+      const cacheNames = await caches.keys();
+      for (let cacheName of cacheNames) {
+        await caches.delete(cacheName);
+        console.log('✅ Кеш удалён:', cacheName);
+      }
+      console.log('🔄 Перезагрузи страницу (Cmd+R)');
+    }
+  };
+  
+  console.log('💡 Для очистки Service Worker выполни в консоли: clearServiceWorker()');
 });
 
 // Регистрация Service Worker
