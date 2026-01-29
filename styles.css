@@ -2003,4 +2003,11 @@ body{
     #e8e4da 100%
   );
 }
+/* 1. Убираем белый задник у верхней области */
+.topbar,
+.topbar-wrapper,
+.header,
+.header-wrapper {
+  background: transparent !important;
+}
 
