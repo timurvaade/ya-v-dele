@@ -1966,3 +1966,41 @@ body {
   object-fit:cover;
   display:block;
 }
+/* последний старый стиль */
+.some-old-class{
+  ...
+}
+
+/* === TOPBAR FINAL CLEAN === */
+
+.topbar{
+  background: linear-gradient(
+    180deg,
+    rgba(245,245,245,0.9),
+    rgba(238,238,238,0.9)
+  );
+  border: none;
+  box-shadow:
+    0 10px 24px rgba(0,0,0,.08),
+    inset 0 1px 0 rgba(255,255,255,.6);
+}
+
+.menu-btn{
+  width:60px;
+  height:60px;
+}
+
+.menu-btn svg{
+  width:26px;
+  height:26px;
+  opacity:.85;
+}
+
+body{
+  background: linear-gradient(
+    180deg,
+    #f1efe9 0%,
+    #e8e4da 100%
+  );
+}
+
