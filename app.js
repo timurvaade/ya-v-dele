@@ -729,8 +729,8 @@ function initSearch() {
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
-          svgElement.setAttribute('width', '16');
-          svgElement.setAttribute('height', '16');
+          svgElement.setAttribute('width', '20');
+          svgElement.setAttribute('height', '20');
           clearBtn.innerHTML = '';
           clearBtn.appendChild(svgElement);
         }
@@ -2673,8 +2673,8 @@ function createTaskElement(task, listId) {
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
-          svgElement.setAttribute('width', '16');
-          svgElement.setAttribute('height', '16');
+          svgElement.setAttribute('width', '20');
+          svgElement.setAttribute('height', '20');
           editIcon.appendChild(svgElement);
         }
       } else {
@@ -2698,8 +2698,8 @@ function createTaskElement(task, listId) {
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
-          svgElement.setAttribute('width', '14');
-          svgElement.setAttribute('height', '14');
+        svgElement.setAttribute('width', '20');
+        svgElement.setAttribute('height', '20');
           descArrow.appendChild(svgElement);
         }
       } else {
@@ -2731,8 +2731,8 @@ function createTaskElement(task, listId) {
           const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
           const svgElement = svgDoc.querySelector('svg');
           if (svgElement) {
-            svgElement.setAttribute('width', '14');
-            svgElement.setAttribute('height', '14');
+        svgElement.setAttribute('width', '20');
+        svgElement.setAttribute('height', '20');
             descArrow.innerHTML = '';
             descArrow.appendChild(svgElement);
           }
