@@ -74,6 +74,7 @@
                     <button class="tab" data-filter="all">Все дела</button>
                     <button class="tab is-active" data-filter="today">На сегодня</button>
                     <button class="tab" data-filter="week">На неделе</button>
+                    <button class="tab" data-filter="nodate">Без даты</button>
                 </div>
 
             <!-- Заголовок раздела -->
@@ -186,9 +187,12 @@
             </div>
         </div>
 
-        <!-- FAB кнопка -->
-        <button class="fab" aria-label="Add">
-            <!-- SVG иконка загрузится через JavaScript -->
+        <!-- Фиксированная кнопка "Добавить задачу" -->
+        <button class="add-task-fab" id="add-task-fab" aria-label="Добавить задачу">
+            <span class="add-task-fab__icon">
+                <!-- SVG иконка загрузится через JavaScript -->
+            </span>
+            <span class="add-task-fab__text">Добавить задачу</span>
         </button>
     </div>
 

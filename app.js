@@ -1510,6 +1510,9 @@ function updateSectionTitle() {
     sectionTitle.textContent = 'Дела на неделю';
     const weekEnd = new Date(today);
     weekEnd.setDate(weekEnd.getDate() + 7);
+  } else if (currentFilter === 'nodate') {
+    sectionTitle.textContent = 'Задачи без даты';
+    sectionSubtitle.textContent = 'Все задачи из всех списков';
     const startStr = today.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     const endStr = weekEnd.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
     sectionSubtitle.textContent = `${startStr} — ${endStr}`;
@@ -1540,40 +1543,49 @@ function initFilters() {
   });
 }
 
-// Инициализация FAB кнопки
+// Инициализация FAB кнопки (теперь "Добавить задачу")
 function initFAB() {
-  const fab = document.querySelector('.fab');
+  const fab = document.querySelector('.add-task-fab');
   if (!fab) return;
   
-  // Скрываем FAB до загрузки иконки, чтобы избежать мерцания
-  fab.style.opacity = '0';
+  const iconContainer = fab.querySelector('.add-task-fab__icon');
+  if (iconContainer) {
+    // Загружаем иконку плюса
+    loadIconSVG('plus').then(svgText => {
+      if (svgText) {
+        const parser = new DOMParser();
+        const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
+        const svgElement = svgDoc.querySelector('svg');
+        if (svgElement) {
+          svgElement.setAttribute('width', '20');
+          svgElement.setAttribute('height', '20');
+          svgElement.style.color = 'white';
+          iconContainer.appendChild(svgElement);
+        }
+      }
+    });
+  }
   
-  // Загружаем иконку плюса
-  loadIconSVG('plus').then(svgText => {
-    if (svgText) {
-      const parser = new DOMParser();
-      const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
-      const svgElement = svgDoc.querySelector('svg');
-      if (svgElement) {
-        svgElement.setAttribute('width', '24');
-        svgElement.setAttribute('height', '24');
-        svgElement.style.color = 'white';
-        fab.innerHTML = '';
-        fab.appendChild(svgElement);
-        // Показываем FAB после загрузки иконки
-        fab.style.opacity = '1';
-      } else {
-        fab.textContent = '+'; // Fallback
-        fab.style.opacity = '1';
+  // При клике открываем модалку выбора списка или создаём задачу в первом списке
+  fab.addEventListener('click', () => {
+    // Если есть активный список - создаём задачу в нём
+    if (window.APP_DATA && window.APP_DATA.lists && window.APP_DATA.lists.length > 0) {
+      const firstList = window.APP_DATA.lists[0];
+      const listCard = document.querySelector(`[data-list-id="${firstList.id}"]`);
+      if (listCard) {
+        const tasksContainer = listCard.querySelector('.tasks');
+        const addTaskBtn = listCard.querySelector('.add-task-btn');
+        if (tasksContainer && addTaskBtn) {
+          // Раскрываем список если свернут
+          listCard.classList.add('is-expanded');
+          tasksContainer.style.display = 'flex';
+          // Показываем поле ввода
+          showAddTaskInput(firstList, tasksContainer, addTaskBtn);
+        }
       }
     } else {
-      fab.textContent = '+'; // Fallback
-      fab.style.opacity = '1';
+      showToast('Сначала создайте список');
     }
-  });
-  
-  fab.addEventListener('click', () => {
-    showCreateListModal();
   });
 }
 
@@ -1921,7 +1933,7 @@ function filterTasks(tasks) {
   weekEnd.setDate(weekEnd.getDate() + 7);
   
   return tasks.filter(task => {
-    // Фильтр по дате (all, today, week)
+    // Фильтр по дате (all, today, week, nodate)
     let matchesDateFilter = true;
     if (currentFilter === 'today') {
       if (task.due_date) {
@@ -1939,6 +1951,8 @@ function filterTasks(tasks) {
       } else {
         matchesDateFilter = false; // Без даты не показываем в "на неделе"
       }
+    } else if (currentFilter === 'nodate') {
+      matchesDateFilter = !task.due_date || task.due_date === ''; // Только задачи без даты
     }
     
     // Фильтр по статусу (all, open, closed, risk)
@@ -2034,6 +2048,11 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
 
   const card = document.createElement('div');
   card.className = 'list-card';
+  
+  // Получаем цвет для списка
+  const listColor = getListColor(list.title);
+  card.classList.add(`list-card--${listColor}`);
+  
   if (shouldExpand) {
     card.classList.add('is-expanded');
   } else if (shouldPeek) {
@@ -2042,27 +2061,61 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
   if (isEmpty) card.classList.add('is-empty-list');
   card.dataset.listId = list.id;
   
-  // Заголовок списка
+  // Заголовок списка (новая структура)
   const head = document.createElement('div');
   head.className = 'list-card__head';
   
+  // Левая часть: название списка
   const headLeft = document.createElement('div');
   headLeft.className = 'list-card__head-left';
   
   const title = document.createElement('h3');
   title.className = 'list-title';
   title.textContent = list.title;
-
+  headLeft.appendChild(title);
+  
+  // Правая часть: количество задач + аватары + иконка
+  const headRight = document.createElement('div');
+  headRight.className = 'list-card__head-right';
+  
+  // Количество задач
   const countBadge = document.createElement('span');
   countBadge.className = 'list-count';
-  countBadge.textContent = tasks.length;
-
-  headLeft.appendChild(title);
-  headLeft.appendChild(countBadge);
+  const taskWord = tasks.length === 1 ? 'задача' : tasks.length < 5 ? 'задачи' : 'задач';
+  countBadge.textContent = `${tasks.length} ${taskWord}`;
+  headRight.appendChild(countBadge);
   
+  // Аватары ответственных (собираем из всех задач списка)
+  const allAssignees = new Set();
+  list.items.forEach(task => {
+    if (task.assignee) {
+      const assignees = parseAssignees(task.assignee);
+      assignees.forEach(a => allAssignees.add(a.name));
+    }
+  });
+  
+  if (allAssignees.size > 0) {
+    const assigneesContainer = createAssignees(Array.from(allAssignees).slice(0, 4).join(', '));
+    if (assigneesContainer) {
+      // Ограничиваем до 3-4 аватаров
+      const avatars = assigneesContainer.querySelectorAll('.avatar');
+      if (avatars.length > 3) {
+        avatars[3].classList.add('avatar--more');
+        avatars[3].textContent = `+${allAssignees.size - 3}`;
+        // Удаляем остальные
+        for (let i = 4; i < avatars.length; i++) {
+          avatars[i].remove();
+        }
+      }
+      headRight.appendChild(assigneesContainer);
+    }
+  }
+  
+  // Иконка стрелки (скрыта в новом дизайне, но оставляем для функциональности)
   const toggleBtn = document.createElement('button');
   toggleBtn.className = 'toggle-btn';
   toggleBtn.setAttribute('aria-label', 'Toggle');
+  toggleBtn.style.display = 'none'; // Скрываем в новом дизайне
   
   // Загружаем иконку стрелки вниз
   loadIconSVG('chevron-down').then(svgText => {
@@ -2075,13 +2128,12 @@ function createListCard(list, tasks, autoExpand = false, isEmpty = false) {
         svgElement.setAttribute('height', '16');
         toggleBtn.appendChild(svgElement);
       }
-    } else {
-      toggleBtn.textContent = '▼'; // Fallback
     }
   });
   
   head.appendChild(headLeft);
-  head.appendChild(toggleBtn);
+  head.appendChild(headRight);
+  head.appendChild(toggleBtn); // Добавляем для функциональности, но скрываем
   
   // Превью первой задачи (для состояния "приоткрыто")
   const previewContainer = document.createElement('div');
@@ -3078,6 +3130,35 @@ function showEditDescriptionInput(task, descBlock, descText, listId) {
       cancel();
     }
   });
+}
+
+// Получение цвета для списка (на основе названия)
+function getListColor(listTitle) {
+  if (!listTitle) return 'blue';
+  
+  // Предопределённые цвета для известных списков
+  const predefined = {
+    'linko': 'violet',
+    'таргет': 'green',
+    'zbrush': 'blue',
+    'техника домой': 'brown',
+    'работа': 'blue',
+    'семья': 'green'
+  };
+  
+  const lowerTitle = listTitle.toLowerCase().trim();
+  if (predefined[lowerTitle]) {
+    return predefined[lowerTitle];
+  }
+  
+  // Хеширование для консистентного цвета
+  let hash = 0;
+  for (let i = 0; i < lowerTitle.length; i++) {
+    hash = lowerTitle.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  
+  const colorNames = ['blue', 'green', 'violet', 'cyan', 'brown', 'teal', 'red'];
+  return colorNames[Math.abs(hash) % colorNames.length];
 }
 
 // Получение цвета категории

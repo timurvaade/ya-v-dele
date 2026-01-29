@@ -59,7 +59,7 @@ body {
   background: var(--card);
   border-radius: 0;
   padding: 12px;
-  padding-bottom: 100px; /* место для FAB */
+  padding-bottom: 100px; /* место для фиксированной кнопки */
   min-height: 100vh;
   position: relative;
 }
@@ -457,56 +457,54 @@ body {
 }
 
 .tab {
-  background: none;
-  border: none;
+  position: relative;
+  padding: 10px 16px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 20px; /* Pill форма */
   font-size: 14px;
   font-weight: 500;
   color: var(--text-muted);
-  padding: 10px 4px;
   cursor: pointer;
-  position: relative;
-  transition: color 0.2s ease;
+  transition: all 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .tab:hover {
   color: var(--text);
+  border-color: var(--text-muted);
 }
 
 .tab.is-active {
-  color: var(--text);
+  color: white;
   font-weight: 600;
+  background: var(--accent-violet);
+  border-color: var(--accent-violet);
 }
 
 .tab.is-active::after {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--text);
-  border-radius: 2px 2px 0 0;
+  display: none; /* Убираем подчёркивание в новом дизайне */
 }
 
 /* Section Head */
 .section-head {
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .section-title {
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.8px;
-  color: var(--text-light);
-  text-transform: uppercase;
-  margin-bottom: 2px;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+  text-transform: none;
+  letter-spacing: normal;
 }
 
 .section-subtitle {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--text);
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--text-muted);
 }
 
 /* Filters */
@@ -520,11 +518,11 @@ body {
 .filter-btn {
   display: flex;
   align-items: center;
-  gap: 4px;
-  padding: 5px 10px;
+  gap: 6px;
+  padding: 8px 14px;
   background: var(--white);
   border: 1px solid var(--line);
-  border-radius: 14px;
+  border-radius: 16px; /* Pill форма */
   cursor: pointer;
   transition: all 0.15s ease;
   flex-shrink: 0;
@@ -532,12 +530,13 @@ body {
 
 .filter-btn:hover {
   background: #f8f8f8;
+  border-color: var(--text-muted);
 }
 
 .filter-btn.is-active {
-  background: var(--text);
+  background: var(--accent-blue);
   color: var(--white);
-  border-color: var(--text);
+  border-color: var(--accent-blue);
 }
 
 .filter-label {
@@ -575,16 +574,53 @@ body {
   gap: 12px;
 }
 
-/* List Card */
+/* List Card - Цветные блоки */
 .list-card {
   background: var(--card-inner);
-  border-radius: 16px;
-  padding: 16px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
+  padding: 20px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   transition: all 0.2s ease;
+  margin-bottom: 16px;
   
   /* Анимация появления */
   animation: cardAppear 0.4s ease-out both;
+}
+
+/* Цветные варианты карточек */
+.list-card--blue {
+  background: linear-gradient(135deg, #4A90E2 0%, #5BA0F2 100%);
+  color: white;
+}
+
+.list-card--green {
+  background: linear-gradient(135deg, #5B8C7D 0%, #6B9C8D 100%);
+  color: white;
+}
+
+.list-card--violet {
+  background: linear-gradient(135deg, #8B8FD8 0%, #9B9FE8 100%);
+  color: white;
+}
+
+.list-card--cyan {
+  background: linear-gradient(135deg, #4FA5B8 0%, #5FB5C8 100%);
+  color: white;
+}
+
+.list-card--brown {
+  background: linear-gradient(135deg, #A0826D 0%, #B0927D 100%);
+  color: white;
+}
+
+.list-card--teal {
+  background: linear-gradient(135deg, #4D8B8B 0%, #5D9B9B 100%);
+  color: white;
+}
+
+.list-card--red {
+  background: linear-gradient(135deg, #D97056 0%, #E98066 100%);
+  color: white;
 }
 
 /* Staggered появление — каждая карточка с задержкой */
@@ -609,49 +645,67 @@ body {
 }
 
 .list-card:hover {
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px);
+}
+
+.list-card:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 /* Пустой список (нет задач по фильтру) */
 .list-card.is-empty-list {
-  opacity: 0.5;
-  background: transparent;
+  opacity: 0.4;
+  background: rgba(255, 255, 255, 0.3);
   box-shadow: none;
-  border: 1px dashed var(--line);
+  border: 1px dashed rgba(255, 255, 255, 0.5);
 }
 
 .list-card.is-empty-list:hover {
   box-shadow: none;
+  opacity: 0.6;
+}
+
+.list-card.is-empty-list .list-title,
+.list-card.is-empty-list .list-count {
   opacity: 0.7;
 }
 
 .list-card__head {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  margin-bottom: 16px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
 }
 
 .list-card__head-left {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.list-card__head-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
+  flex-shrink: 0;
 }
 
 .list-count {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 28px;
-  height: 24px;
-  padding: 0 8px;
-  background: rgba(0, 0, 0, 0.05);
+  padding: 6px 12px;
+  background: rgba(255, 255, 255, 0.25);
   border-radius: 12px;
   font-size: 13px;
   font-weight: 600;
-  color: var(--text-light);
+  color: white;
+  white-space: nowrap;
 }
 
 .list-edit-btn {
@@ -723,15 +777,18 @@ body {
 }
 
 .avatar--more {
-  background: var(--accent-violet);
-  color: var(--white);
-  font-size: 10px;
+  background: rgba(255, 255, 255, 0.4);
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
 }
 
 .list-title {
-  font-size: 18px;
+  font-size: 22px;
   font-weight: 700;
-  color: var(--text);
+  color: white;
+  line-height: 1.2;
+  margin: 0;
 }
 
 .toggle-btn {
@@ -757,18 +814,34 @@ body {
   transform: rotate(180deg);
 }
 
-/* Tasks */
-.tasks {
+/* Tasks внутри цветных карточек */
+.list-card .tasks {
   display: flex;
   flex-direction: column;
   gap: 0;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Задачи внутри цветных карточек должны быть на белом фоне */
+.list-card .task {
+  background: white;
+  border-radius: 12px;
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.list-card .task:last-child {
+  margin-bottom: 0;
 }
 
 /* Превью задачи в приоткрытом состоянии */
 .task-preview {
-  padding: 10px 0;
-  border-top: 1px solid var(--line);
+  padding: 12px 0;
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
   animation: previewAppear 0.3s ease-out;
+  margin-top: 8px;
 }
 
 @keyframes previewAppear {
@@ -781,18 +854,20 @@ body {
 }
 
 .task-preview__title {
-  font-size: 14px;
-  color: var(--text-light);
+  font-size: 15px;
+  color: white;
+  font-weight: 500;
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
+  opacity: 0.95;
 }
 
 .task-preview__more {
-  font-size: 12px;
-  color: var(--text-light);
+  font-size: 13px;
+  color: white;
   margin-top: 4px;
   opacity: 0.7;
 }
@@ -1359,19 +1434,16 @@ body {
   flex-wrap: wrap;
 }
 
-/* FAB */
-.fab {
+/* Фиксированная кнопка "Добавить задачу" */
+.add-task-fab {
   position: fixed;
   bottom: 24px;
-  right: 24px;
-  width: 56px;
+  left: 12px;
+  right: 12px;
   height: 56px;
   background: var(--fab-bg);
   border: none;
-  border-radius: 50%;
-  font-size: 32px;
-  font-weight: 300;
-  line-height: 1;
+  border-radius: 28px; /* Pill форма */
   color: white;
   cursor: pointer;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
@@ -1379,25 +1451,43 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 10px;
   z-index: 1000;
-  padding: 0;
-  overflow: hidden; /* Скрываем содержимое до загрузки */
+  padding: 0 24px;
+  font-size: 16px;
+  font-weight: 600;
 }
 
-.fab svg {
-  display: block;
-  width: 24px !important;
-  height: 24px !important;
+.add-task-fab:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+.add-task-fab:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+}
+
+.add-task-fab__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.fab:hover {
-  transform: scale(1.1) rotate(90deg);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.4);
+.add-task-fab__icon svg {
+  display: block;
+  width: 20px !important;
+  height: 20px !important;
 }
 
-.fab:active {
-  transform: scale(1.05) rotate(90deg);
+.add-task-fab__text {
+  white-space: nowrap;
+}
+
+/* Старый FAB (скрыт, но оставляем для совместимости) */
+.fab {
+  display: none;
 }
 
 /* Modal */
