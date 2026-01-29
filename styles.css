@@ -1863,3 +1863,106 @@ body {
     font-size: 32px;
   }
 }
+/* ===== TOPBAR — финальная правка под макет ===== */
+
+.topbar{
+  display:flex;
+  align-items:center;
+  gap:16px;
+
+  /* панель */
+  padding:20px 24px;
+  margin:18px 18px 10px;
+
+  border-radius:28px;
+
+  /* серо-тёплый фон, как в макете */
+  background: linear-gradient(180deg, rgba(246,246,246,0.95), rgba(240,240,240,0.95));
+  box-shadow:
+    0 18px 45px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.70);
+
+  /* если у тебя родитель дает фон — это важно */
+  border: 1px solid rgba(0,0,0,.04);
+}
+
+/* Кнопка меню — круглая, чуть серая */
+.menu-btn{
+  width:56px;
+  height:56px;
+  border-radius:999px;
+  border:0;
+
+  background: radial-gradient(circle at 30% 25%, #f7f7f7 0%, #ececec 60%, #e6e6e6 100%);
+  box-shadow:
+    0 10px 25px rgba(0,0,0,.10),
+    inset 0 1px 0 rgba(255,255,255,.70);
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Поиск — серая пилюля */
+.search{
+  flex:1;
+  height:56px;
+  border-radius:999px;
+
+  background: linear-gradient(180deg, #f1f1f1, #e8e8e8);
+  box-shadow:
+    inset 0 2px 10px rgba(0,0,0,.08),
+    0 8px 18px rgba(0,0,0,.06);
+
+  display:flex;
+  align-items:center;
+  position:relative;
+}
+
+#search-input{
+  width:100%;
+  height:100%;
+  border:0;
+  outline:0;
+  background:transparent;
+
+  padding:0 54px 0 22px;
+  font-size:18px;
+}
+
+#search-input::placeholder{
+  color: rgba(0,0,0,.35);
+}
+
+.search-clear{
+  position:absolute;
+  right:14px;
+  width:34px;
+  height:34px;
+  border-radius:999px;
+  border:0;
+  background: transparent;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+
+/* Аватар — чуть меньше, аккуратная тень */
+.avatar-btn{
+  width:56px;
+  height:56px;
+  border-radius:999px;
+  border:0;
+  padding:0;
+  overflow:hidden;
+
+  box-shadow: 0 12px 28px rgba(0,0,0,.12);
+  background:#fff;
+}
+
+.avatar-btn img{
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  display:block;
+}
