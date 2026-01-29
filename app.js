@@ -1545,6 +1545,9 @@ function initFAB() {
   const fab = document.querySelector('.fab');
   if (!fab) return;
   
+  // Скрываем FAB до загрузки иконки, чтобы избежать мерцания
+  fab.style.opacity = '0';
+  
   // Загружаем иконку плюса
   loadIconSVG('plus').then(svgText => {
     if (svgText) {
@@ -1557,9 +1560,15 @@ function initFAB() {
         svgElement.style.color = 'white';
         fab.innerHTML = '';
         fab.appendChild(svgElement);
+        // Показываем FAB после загрузки иконки
+        fab.style.opacity = '1';
+      } else {
+        fab.textContent = '+'; // Fallback
+        fab.style.opacity = '1';
       }
     } else {
       fab.textContent = '+'; // Fallback
+      fab.style.opacity = '1';
     }
   });
   
