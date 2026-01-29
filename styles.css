@@ -226,10 +226,27 @@ body {
 
 .sidebar__close svg {
   display: block;
+  transition: transform 0.3s ease;
 }
 
 .sidebar__close:hover {
   background: var(--bg-light);
+}
+
+.sidebar__close.is-closing svg {
+  animation: closeIconSpin 0.3s ease;
+}
+
+@keyframes closeIconSpin {
+  0% {
+    transform: rotate(0deg);
+  }
+  50% {
+    transform: rotate(180deg) scale(0.8);
+  }
+  100% {
+    transform: rotate(360deg) scale(1);
+  }
 }
 
 .sidebar__content {

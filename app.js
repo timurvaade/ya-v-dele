@@ -729,8 +729,8 @@ function initSearch() {
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
-          svgElement.setAttribute('width', '18');
-          svgElement.setAttribute('height', '18');
+          svgElement.setAttribute('width', '16');
+          svgElement.setAttribute('height', '16');
           clearBtn.innerHTML = '';
           clearBtn.appendChild(svgElement);
         }
@@ -1167,8 +1167,8 @@ function initSidebar() {
       const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
       const svgElement = svgDoc.querySelector('svg');
       if (svgElement) {
-        svgElement.setAttribute('width', '20');
-        svgElement.setAttribute('height', '20');
+        svgElement.setAttribute('width', '18');
+        svgElement.setAttribute('height', '18');
         sidebarClose.innerHTML = '';
         sidebarClose.appendChild(svgElement);
       }
@@ -1198,6 +1198,15 @@ function initSidebar() {
       e.preventDefault();
       e.stopPropagation();
     }
+    
+    // Добавляем анимацию на иконку закрытия
+    if (sidebarClose) {
+      sidebarClose.classList.add('is-closing');
+      setTimeout(() => {
+        sidebarClose.classList.remove('is-closing');
+      }, 300);
+    }
+    
     sidebar?.classList.remove('is-open');
     sidebarOverlay?.classList.remove('is-open');
     // Восстанавливаем скролл body
