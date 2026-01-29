@@ -226,7 +226,7 @@ body {
 
 .sidebar__close svg {
   display: block;
-  transition: transform 0.3s ease;
+  transition: transform 0.2s ease;
 }
 
 .sidebar__close:hover {
@@ -234,15 +234,15 @@ body {
 }
 
 .sidebar__close.is-closing svg {
-  animation: closeIconSpin 0.3s ease;
+  animation: closeIconSpin 0.3s ease forwards;
 }
 
 @keyframes closeIconSpin {
   0% {
-    transform: rotate(0deg);
+    transform: rotate(0deg) scale(1);
   }
   50% {
-    transform: rotate(180deg) scale(0.8);
+    transform: rotate(180deg) scale(0.9);
   }
   100% {
     transform: rotate(360deg) scale(1);

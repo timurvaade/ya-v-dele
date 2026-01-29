@@ -729,8 +729,8 @@ function initSearch() {
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
-          svgElement.setAttribute('width', '16');
-          svgElement.setAttribute('height', '16');
+          svgElement.setAttribute('width', '14');
+          svgElement.setAttribute('height', '14');
           clearBtn.innerHTML = '';
           clearBtn.appendChild(svgElement);
         }
@@ -1199,20 +1199,24 @@ function initSidebar() {
       e.stopPropagation();
     }
     
-    // Добавляем анимацию на иконку закрытия
+    // Добавляем анимацию на иконку закрытия ПЕРЕД закрытием sidebar
     if (sidebarClose) {
       sidebarClose.classList.add('is-closing');
+      // Убираем класс после анимации
       setTimeout(() => {
         sidebarClose.classList.remove('is-closing');
       }, 300);
     }
     
-    sidebar?.classList.remove('is-open');
-    sidebarOverlay?.classList.remove('is-open');
-    // Восстанавливаем скролл body
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.width = '';
+    // Небольшая задержка перед закрытием, чтобы анимация была видна
+    setTimeout(() => {
+      sidebar?.classList.remove('is-open');
+      sidebarOverlay?.classList.remove('is-open');
+      // Восстанавливаем скролл body
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    }, 50);
   };
   
   // Обработчики для десктопа и мобильных
