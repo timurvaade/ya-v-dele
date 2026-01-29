@@ -1380,7 +1380,15 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 1000;
-  padding-bottom: 2px; /* оптическая компенсация */
+  padding: 0;
+  overflow: hidden; /* Скрываем содержимое до загрузки */
+}
+
+.fab svg {
+  display: block;
+  width: 24px !important;
+  height: 24px !important;
+  flex-shrink: 0;
 }
 
 .fab:hover {
