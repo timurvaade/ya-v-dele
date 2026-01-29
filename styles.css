@@ -2010,4 +2010,20 @@ body{
 .header-wrapper {
   background: transparent !important;
 }
+/* УБИРАЕМ ЗАДНИК ВЕРХНЕГО КОНТЕЙНЕРА */
+.header,
+.header-wrapper {
+  background: none;
+  box-shadow: none;
+  border: none;
+}
+html, body {
+  background: #FFFFFF;
+}
+#menu-btn svg,
+.menu-btn svg {
+  width: 28px;
+  height: 28px;
+}
+
 
