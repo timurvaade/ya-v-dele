@@ -1201,14 +1201,19 @@ function initSidebar() {
     
     // Добавляем анимацию на иконку закрытия ПЕРЕД закрытием sidebar
     if (sidebarClose) {
+      // Сбрасываем предыдущую анимацию если была
+      sidebarClose.classList.remove('is-closing');
+      // Принудительно перезапускаем анимацию
+      void sidebarClose.offsetWidth; // Trigger reflow
       sidebarClose.classList.add('is-closing');
+      
       // Убираем класс после анимации
       setTimeout(() => {
         sidebarClose.classList.remove('is-closing');
       }, 300);
     }
     
-    // Небольшая задержка перед закрытием, чтобы анимация была видна
+    // Закрываем sidebar ПОСЛЕ начала анимации, чтобы она была видна
     setTimeout(() => {
       sidebar?.classList.remove('is-open');
       sidebarOverlay?.classList.remove('is-open');
@@ -1216,7 +1221,7 @@ function initSidebar() {
       document.body.style.overflow = '';
       document.body.style.position = '';
       document.body.style.width = '';
-    }, 50);
+    }, 150); // Увеличиваем задержку, чтобы анимация была видна
   };
   
   // Обработчики для десктопа и мобильных
