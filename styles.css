@@ -408,10 +408,14 @@ body {
   .sidebar__close {
     width: 36px;
     height: 36px;
-    font-size: 28px;
     /* Увеличиваем область клика для мобильных */
     padding: 0;
     margin: -8px;
+  }
+  
+  .sidebar__close svg {
+    width: 18px !important;
+    height: 18px !important;
   }
   
   .sidebar__content {
