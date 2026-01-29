@@ -723,14 +723,14 @@ function initSearch() {
   
   // Загружаем иконку для кнопки очистки
   if (clearBtn) {
-    loadIconSVG('close').then(svgText => {
+    loadIconSVG('close-search').then(svgText => {
       if (svgText) {
         const parser = new DOMParser();
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
-          svgElement.setAttribute('width', '20');
-          svgElement.setAttribute('height', '20');
+          svgElement.setAttribute('width', '24');
+          svgElement.setAttribute('height', '24');
           clearBtn.innerHTML = '';
           clearBtn.appendChild(svgElement);
         }
@@ -1161,14 +1161,14 @@ function initSidebar() {
     }
   });
   
-  loadIconSVG('close').then(svgText => {
+  loadIconSVG('close-sidebar').then(svgText => {
     if (svgText && sidebarClose) {
       const parser = new DOMParser();
       const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
       const svgElement = svgDoc.querySelector('svg');
       if (svgElement) {
-        svgElement.setAttribute('width', '24');
-        svgElement.setAttribute('height', '24');
+        svgElement.setAttribute('width', '28');
+        svgElement.setAttribute('height', '28');
         sidebarClose.innerHTML = '';
         sidebarClose.appendChild(svgElement);
       }
