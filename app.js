@@ -729,8 +729,8 @@ function initSearch() {
         const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
         const svgElement = svgDoc.querySelector('svg');
         if (svgElement) {
-          svgElement.setAttribute('width', '24');
-          svgElement.setAttribute('height', '24');
+          svgElement.setAttribute('width', '18');
+          svgElement.setAttribute('height', '18');
           clearBtn.innerHTML = '';
           clearBtn.appendChild(svgElement);
         }
@@ -1167,8 +1167,8 @@ function initSidebar() {
       const svgDoc = parser.parseFromString(svgText, 'image/svg+xml');
       const svgElement = svgDoc.querySelector('svg');
       if (svgElement) {
-        svgElement.setAttribute('width', '28');
-        svgElement.setAttribute('height', '28');
+        svgElement.setAttribute('width', '20');
+        svgElement.setAttribute('height', '20');
         sidebarClose.innerHTML = '';
         sidebarClose.appendChild(svgElement);
       }
